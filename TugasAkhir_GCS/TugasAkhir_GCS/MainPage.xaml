@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TugasAkhir_GCS.MainPage">
+    <StackLayout>
+        <Grid ColumnDefinitions="*,*,*" HeightRequest="40" Padding="5">
+            <Image x:Name="imgTest" Source="https://www.tekat.my.id/wp-content/uploads/2021/02/tekat-logo-1-01.png" HorizontalOptions="Center"/>
+            <!--<Label Text="2ND COLUMN" Grid.Column="1"/>
+            <Label Text="3RD COLUMN" Grid.Column="2"/>-->
+        </Grid>
+        <Grid VerticalOptions="FillAndExpand">
+            <ScrollView>
+                <StackLayout>
+                    <Frame BackgroundColor="#2196F3" Padding="24" CornerRadius="0">
+                        <StackLayout>
+                            <Label Text="Welcome to Xamarin.Forms! TEST ADDED" HorizontalTextAlignment="Center" TextColor="White" FontSize="36"/>
+                            <Label Text="{x:Binding TestString}"/>
+                        </StackLayout>
+                    </Frame>
+                    <Entry Placeholder="Insert new value here" Text="{Binding TestString}"/>
+                    <Label Text="Start developing now" FontSize="Title" Padding="30,10,30,10"/>
+                    <Label Text="Make changes to your XAML file and save to see your UI update in the running app with XAML Hot Reload. Give it a try!" FontSize="16" Padding="30,0,30,0"/>
+                    <Label FontSize="16" Padding="30,24,30,0">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Learn more at "/>
+                                <Span Text="https://aka.ms/xamarin-quickstart" FontAttributes="Bold"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <WebView Source="https://www.tekat.my.id/" VerticalOptions="FillAndExpand"/>
+                </StackLayout>
+            </ScrollView>
+        </Grid>
+    </StackLayout>
+</ContentPage>
