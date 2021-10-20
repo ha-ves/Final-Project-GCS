@@ -8,9 +8,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using MavLink4Net.Messages;
-using MavLink4Net.Messages.Common;
-using MavLink4Net.Messages.Serialization;
+using MavLinkNet;
 using Xamarin.Forms;
 
 namespace TugasAkhir_GCS
@@ -23,7 +21,6 @@ namespace TugasAkhir_GCS
         public ImageSource ImgUsed { get { return ImageSource.FromResource("PigeonMobile_Xamarin_Cs.Resources.pigeon.png", typeof(App).Assembly); } }
 
         AesManaged enc, dec;
-        Message receivedMessage;
 
         TcpClient tcpClient;
 
@@ -46,11 +43,11 @@ namespace TugasAkhir_GCS
 
         private void TestMavLink(object sender, EventArgs e)
         {
-            AttitudeMessage msg = new AttitudeMessage();
-            msg = (AttitudeMessage)MessageFactory.CreateMessage(msg.MavType);
-
             MemoryStream txStream = new MemoryStream();
-            MessageSerializerFactory.CreateSerializer(msg.MavType).Serialize(new BinaryWriter(txStream), msg);
+
+            UasAttitude asd = new MavLinkNet.UasAttitude();
+            MavLinkPacket.GetPacketForMessage(asd, 0, 0, 0).Serialize(new BinaryWriter(txStream));
+
             Debug.WriteLine("");
             Debug.Write("Attitude MAVLink Message : ");
             txStream.ToArray().ToArray().ToList().ForEach(item => Debug.Write(item.ToString("x2")));
