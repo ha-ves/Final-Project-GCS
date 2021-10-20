@@ -14,12 +14,13 @@
                     <Frame BackgroundColor="#2196F3" Padding="24" CornerRadius="0">
                         <StackLayout>
                             <Label Text="Welcome to Xamarin.Forms! TEST ADDED" HorizontalTextAlignment="Center" TextColor="White" FontSize="36"/>
-                            <Label Text="{x:Binding TestString}"/>
+                            <Label Text="{x:Binding TestString}" HorizontalTextAlignment="Center"/>
                         </StackLayout>
                     </Frame>
-                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
                         <Entry Placeholder="Insert new value here" Text="{Binding TestString}"/>
-                        <Button Text="Decrypt" Clicked="Button_Clicked"/>
+                        <Button Text="Test AES" Clicked="Button_Clicked"/>
+                        <Button Text="Test MAVLink" Clicked="TestMavLink"/>
                     </StackLayout>
                     <Label Text="Start developing now" FontSize="Title" Padding="30,10,30,10"/>
                     <Label Text="Make changes to your XAML file and save to see your UI update in the running app with XAML Hot Reload. Give it a try!" FontSize="16" Padding="30,0,30,0"/>
