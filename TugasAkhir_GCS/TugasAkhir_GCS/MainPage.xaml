@@ -1,40 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="TugasAkhir_GCS.MainPage">
-    <StackLayout>
-        <Grid ColumnDefinitions="*,*,*" HeightRequest="40" Padding="5">
-            <Image x:Name="imgTest" Source="https://www.tekat.my.id/wp-content/uploads/2021/02/tekat-logo-1-01.png" HorizontalOptions="Center"/>
-            <!--<Label Text="2ND COLUMN" Grid.Column="1"/>
-            <Label Text="3RD COLUMN" Grid.Column="2"/>-->
+             x:Class="TugasAkhir_GCS.MainPage"
+             WidthRequest="450">
+    <Grid VerticalOptions="FillAndExpand" RowDefinitions="*,10*">
+        <Frame Grid.Row="0" BackgroundColor="#FFFFFF" Margin="-2,-30,-2,-2" Padding="0,40,0,0" CornerRadius="24"/>
+        <Frame Grid.Row="0" BackgroundColor="#00879D" Margin="0,-32,0,0" Padding="0,40,0,0" CornerRadius="24"/>
+        <Grid Grid.Row="0" ColumnDefinitions="2*,3*">
+            <StackLayout Grid.Column="0" Orientation="Horizontal" VerticalOptions="Center" Margin="20,0">
+                <Label Grid.Column="0" Text="Final Project GCS" FontFamily="Bebas Neue" FontSize="Header" HorizontalOptions="Center"/>
+                <Button Grid.Column="1" Text="disconnected" FontFamily="UD Digi Kyokasho NP-B" CornerRadius="8" BackgroundColor="Red" TextTransform="Uppercase" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+            <StackLayout Grid.Column="1" Orientation="Horizontal" VerticalOptions="CenterAndExpand">
+                <Frame BorderColor="White" Padding="5"  HorizontalOptions="FillAndExpand">
+                    <Label Text="manual mode" FontFamily="UD Digi Kyokasho NP-B" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
+                </Frame>
+                <Label Text="t+00:00:00" FontFamily="UD Digi Kyokasho NP-B" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
+                <Label Text="rssi 100%" FontFamily="UD Digi Kyokasho NP-B" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
+                <Label Text="batt 100%" FontFamily="UD Digi Kyokasho NP-B" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
+            </StackLayout>
         </Grid>
-        <Grid VerticalOptions="FillAndExpand">
-            <ScrollView>
-                <StackLayout>
-                    <Frame BackgroundColor="#2196F3" Padding="24" CornerRadius="0">
-                        <StackLayout>
-                            <Label Text="Welcome to Xamarin.Forms! TEST ADDED" HorizontalTextAlignment="Center" TextColor="White" FontSize="36"/>
-                            <Label Text="{x:Binding TestString}" HorizontalTextAlignment="Center"/>
-                        </StackLayout>
-                    </Frame>
-                    <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
-                        <Entry Placeholder="Insert new value here" Text="{Binding TestString}"/>
-                        <Button Text="Test AES" Clicked="Button_Clicked"/>
-                        <Button Text="Test MAVLink" Clicked="TestMavLink"/>
-                    </StackLayout>
-                    <Label Text="Start developing now" FontSize="Title" Padding="30,10,30,10"/>
-                    <Label Text="Make changes to your XAML file and save to see your UI update in the running app with XAML Hot Reload. Give it a try!" FontSize="16" Padding="30,0,30,0"/>
-                    <Label FontSize="16" Padding="30,24,30,0">
-                        <Label.FormattedText>
-                            <FormattedString>
-                                <Span Text="Learn more at "/>
-                                <Span Text="https://aka.ms/xamarin-quickstart" FontAttributes="Bold"/>
-                            </FormattedString>
-                        </Label.FormattedText>
-                    </Label>
-                    <WebView Source="https://www.tekat.my.id/" VerticalOptions="FillAndExpand"/>
-                </StackLayout>
-            </ScrollView>
-        </Grid>
-    </StackLayout>
+    </Grid>
 </ContentPage>

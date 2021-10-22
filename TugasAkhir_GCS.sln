@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TugasAkhir_GCS.Android", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TugasAkhir_GCS.iOS", "TugasAkhir_GCS\TugasAkhir_GCS.iOS\TugasAkhir_GCS.iOS.csproj", "{FA9EFB2B-D57D-416E-BF32-B75DBFE45E53}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TugasAkhir_GCS", "TugasAkhir_GCS\TugasAkhir_GCS\TugasAkhir_GCS.csproj", "{0FBEBCE4-4B74-4AEE-AE9A-0FC08481C369}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TugasAkhir_GCS", "TugasAkhir_GCS\TugasAkhir_GCS\TugasAkhir_GCS.csproj", "{0FBEBCE4-4B74-4AEE-AE9A-0FC08481C369}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TugasAkhir_GCS.LinuxGTK", "TugasAkhir_GCS.LinuxGTK\TugasAkhir_GCS.LinuxGTK.csproj", "{22DEB0E9-21DF-421D-A9F4-7493F53F6F70}"
 EndProject

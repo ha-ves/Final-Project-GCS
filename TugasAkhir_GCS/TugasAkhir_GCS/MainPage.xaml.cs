@@ -20,7 +20,12 @@ namespace TugasAkhir_GCS
 
         public ImageSource ImgUsed { get { return ImageSource.FromResource("PigeonMobile_Xamarin_Cs.Resources.pigeon.png", typeof(App).Assembly); } }
 
+        string _connectBtn_Text = "Connect";
+        public string ConnectBtn_Text { get { return _connectBtn_Text; } set { _connectBtn_Text = value; OnPropertyChanged("ConnectBtn_Text"); } }
+
         AesManaged enc, dec;
+
+        MavLinkAsyncWalker mavlinkParser;
 
         TcpClient tcpClient;
 
@@ -43,15 +48,36 @@ namespace TugasAkhir_GCS
 
         private void TestMavLink(object sender, EventArgs e)
         {
-            MemoryStream txStream = new MemoryStream();
+            List<byte> rxBuf = new List<byte>(){ 0xfd, 0x10, 0x00, 0x00, 0x3a, 0x00, 0xc8, 0x1e, 0x00, 0x00, 0xbd, 0x12, 0x01, 0x00, 0x83, 0xa1, 0xe9, 0xbb, 0xb4, 0x2d, 0x4b, 0xbc, 0x37, 0xd0, 0xaa, 0x3f, 0x0e, 0xa6 };
 
-            UasAttitude asd = new MavLinkNet.UasAttitude();
-            MavLinkPacket.GetPacketForMessage(asd, 0, 0, 0).Serialize(new BinaryWriter(txStream));
+            mavlinkParser = new MavLinkAsyncWalker();
+            mavlinkParser.PacketReceived += MavlinkMessageReceived;
+            mavlinkParser.PacketDiscarded += MavlinkMessageDiscarded;
+            mavlinkParser.ProcessReceivedBytes(rxBuf.ToArray(), 0, rxBuf.Count);
+        }
 
-            Debug.WriteLine("");
-            Debug.Write("Attitude MAVLink Message : ");
-            txStream.ToArray().ToArray().ToList().ForEach(item => Debug.Write(item.ToString("x2")));
-            Debug.WriteLine("");
+        private void MavlinkMessageDiscarded(object sender, MavLinkPacketBase packet)
+        {
+            Debug.WriteLine("New mavlink data discarded");
+        }
+
+        private void MavlinkMessageReceived(object sender, MavLinkPacketBase packet)
+        {
+            Debug.WriteLine("New mavlink data parsed");
+            string str = "";
+            switch (packet.Message)
+            {
+                case UasAttitude attitude:
+                    str = $"new {packet.Message.GetType().Name} message with YPR: {attitude.Yaw * 180 / Math.PI:0.00} | {attitude.Pitch * 180 / Math.PI:0.00} | {attitude.Roll * 180 / Math.PI:0.00}";
+                    Debug.WriteLine(str);
+                    TestString = str;
+                    break;
+                default:
+                    str = $"Mavlink {packet.Message.GetType().Name} message is not supported by this GCS";
+                    Debug.WriteLine(str);
+                    TestString = str;
+                    break;
+            }
         }
 
         private void Button_Clicked(object sender, EventArgs e)
