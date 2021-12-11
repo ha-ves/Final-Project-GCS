@@ -5,14 +5,21 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MavLinkNet;
+using TugasAkhir_GCS.Interfaces;
+using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.GoogleMaps;
+using Xamarin.Forms.Xaml;
 
 namespace TugasAkhir_GCS
 {
+    [XamlCompilation(XamlCompilationOptions.Skip)]
     public partial class MainPage : ContentPage, INotifyPropertyChanged
     {
         string _testString = "Testing 1 2 3 4";
@@ -29,12 +36,59 @@ namespace TugasAkhir_GCS
 
         TcpClient tcpClient;
 
+        public Button TheTitleBar;
+
         public MainPage()
         {
             BindingContext = this;
             InitializeComponent();
+        }
 
-            AES_Method();
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            new Thread(() => WiFiThreadEntry()).Start();
+
+            DependencyService.Get<ITopBarService>().PrepareTopBar(TopBarGrid, TitleBar);
+
+            //PrepareMap();
+
+            //AES_Method();
+        }
+
+        private async void PrepareMap()
+        {
+            Debug.WriteLine("Preparing map");
+
+            var perm = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+
+            if (perm != PermissionStatus.Granted)
+            {
+                Debug.WriteLine("USER SHOULD ALLOW MANUALLY");
+
+                if(await DisplayAlert("Function not allowed",
+                    $"This function requires Location Permission and we detected that you manually denied access." +
+                    $"Please go to your device's setting and allow the permission for this App.", "Go To Setting", "Deny"))
+                    DependencyService.Get<IPermissionRequestService>().RequestManualPermission(new Permissions.LocationWhenInUse());
+            }
+            else
+            {
+                await DisplayAlert("Location access granted", "Thank your for allowing Location access","Continue");
+                Map.UiSettings.MyLocationButtonEnabled = true;
+                Map.MyLocationEnabled = true;
+            }
+        }
+
+        private void WiFiThreadEntry()
+        {
+            Thread.CurrentThread.Name = "WIFI THREAD";
+
+            while (true)
+            {
+                Debug.WriteLine($"{Thread.CurrentThread.Name} is currently Running.");
+                Thread.Sleep(3000);
+            }
         }
 
         private void AES_Method()

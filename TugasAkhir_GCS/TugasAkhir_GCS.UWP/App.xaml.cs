@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -29,7 +30,6 @@ namespace TugasAkhir_GCS.UWP
         /// </summary>
         public App()
         {
-            ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.Maximized;
             this.InitializeComponent();
             this.Suspending += OnSuspending;
         }
@@ -44,7 +44,7 @@ namespace TugasAkhir_GCS.UWP
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {
-                this.DebugSettings.EnableFrameRateCounter = true;
+                //this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
 
@@ -58,7 +58,13 @@ namespace TugasAkhir_GCS.UWP
                 rootFrame = new Frame();
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
-                Xamarin.Forms.Forms.Init(e);
+
+                var rendererAssemblies = new[]
+                {
+                    typeof(Xamarin.Forms.GoogleMaps.UWP.MapRenderer).GetTypeInfo().Assembly
+                };
+                Xamarin.Forms.Forms.Init(e, rendererAssemblies);
+                Xamarin.FormsGoogleMaps.Init(Variables.BING_MAPS_UWP_API_KEY);
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {

@@ -32,7 +32,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="TugasAkhir_GCS.UWP.App">
       <uap:VisualElements
-        DisplayName="GCS Windows"
+        DisplayName="FINAL PROJECT GCS"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
         Description="Tugas Akhir GCS untuk Windows"
@@ -54,7 +54,8 @@
   </Applications>
 
   <Capabilities>
-    <Capability Name="internetClient" />
+    <Capability Name="internetClient"/>
     <DeviceCapability Name="serialcommunication"/>
+    <DeviceCapability Name="location"/>
   </Capabilities>
 </Package>
