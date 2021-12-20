@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TugasAkhir_GCS.ConnectionSettings"
+             xmlns:local="clr-namespace:TugasAkhir_GCS"
+             IsVisible="true" IsEnabled="true">
+    <ContentView.Resources>
+        <x:String x:Key="IP">test</x:String>
+        <x:Array x:Key="COMs" Type="{x:Type x:String}">
+            <x:String>Test1</x:String>
+            <x:String>Test1</x:String>
+            <x:String>Test1</x:String>
+        </x:Array>
+    </ContentView.Resources>
+    <ContentView.Content>
+        <Frame BackgroundColor="#EF101010" CornerRadius="8" Padding="0">
+            <Grid>
+                <Button Text="X" Clicked="Close_Clicked"  HorizontalOptions="End" VerticalOptions="Start" WidthRequest="40" HeightRequest="40" BackgroundColor="Transparent"/>
+                <StackLayout x:Name="MainStack" Orientation="Vertical" Padding="20">
+                    <Label Text="Media komunikasi :" TextColor="White" FontFamily="TopBar Font" FontSize="Body" CharacterSpacing="2" HorizontalOptions="Center" Margin="0,10"/>
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Margin="0,10">
+                        <ImageButton Clicked="Btn_USB_Clicked" BorderColor="#00879D" BorderWidth="2" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.settings.png}" Aspect="AspectFit" WidthRequest="150" Margin="0,0,10,0" CornerRadius="8"/>
+                        <ImageButton Clicked="Btn_WIFI_Clicked" BorderColor="#00879D" BorderWidth="2" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.settings.png}" Aspect="AspectFit" WidthRequest="150" Margin="10,0,0,0" CornerRadius="8"/>
+                    </StackLayout>
+                    <StackLayout x:Name="ConfigStack" IsVisible="true">
+                        <Label Text="Konfigurasi koneksi :" TextColor="White" FontFamily="TopBar Font" FontSize="Body" CharacterSpacing="2" HorizontalOptions="Center" Margin="0,5"/>
+                        <Entry x:Name="IP_Address" Margin="0,0,0,10" Placeholder="IP Address UAV" Text="{StaticResource IP}"/>
+                        <Picker x:Name="COM_Ports" Margin="0,0,0,10" ItemsSource="{StaticResource COMs}"/>
+                        <Button Clicked="Confirm_Clicked" Text="Confirm" Margin="0,10,0,0"/>
+                    </StackLayout>
+                </StackLayout>
+            </Grid>
+        </Frame>
+    </ContentView.Content>
+</ContentView>

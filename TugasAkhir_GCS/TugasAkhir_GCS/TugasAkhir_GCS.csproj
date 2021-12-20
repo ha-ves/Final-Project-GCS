@@ -16,6 +16,7 @@
     <None Remove="Resources\Images\follow_uav.png" />
     <None Remove="Resources\Images\follow_uav_active.png" />
     <None Remove="Resources\Images\follow_uav_inactive.png" />
+    <None Remove="Resources\Images\settings.png" />
     <None Remove="Resources\logo.png" />
   </ItemGroup>
 
@@ -25,16 +26,18 @@
     <EmbeddedResource Include="Resources\Images\follow_uav_active.png" />
     <EmbeddedResource Include="Resources\Images\follow_uav_inactive.png" />
     <EmbeddedResource Include="Resources\Images\logo.png" />
+    <EmbeddedResource Include="Resources\Images\settings.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
     <PackageReference Include="Xamarin.Forms" Version="5.0.0.2244" />
     <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
     <PackageReference Include="Xamarin.Forms.GoogleMaps" Version="3.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\mavlink.net-protocol_upgrade\mavlink.net\mavlink.net.csproj" />
+    <ProjectReference Include="..\..\..\Pigeon_GCS\Pigeon_WPF_cs\mavlink.net-protocol_upgrade\mavlink.net\mavlink.net.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,6 +49,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="ConnectionSettings.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

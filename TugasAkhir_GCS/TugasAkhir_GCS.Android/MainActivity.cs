@@ -11,7 +11,6 @@ namespace TugasAkhir_GCS.Droid
 {
     [Activity(
         Theme = "@style/MainTheme",
-        MainLauncher = true,
         ConfigurationChanges =
             ConfigChanges.ScreenSize |
             ConfigChanges.Orientation |

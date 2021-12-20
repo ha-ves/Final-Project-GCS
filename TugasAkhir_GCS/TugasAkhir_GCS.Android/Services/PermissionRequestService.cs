@@ -10,16 +10,17 @@ using System.Linq;
 using System.Text;
 using TugasAkhir_GCS.Droid.Services;
 using TugasAkhir_GCS.Interfaces;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
-[assembly: Dependency(typeof(TopBarService))]
+[assembly: Dependency(typeof(PermissionRequestService))]
 namespace TugasAkhir_GCS.Droid.Services
 {
-    class TopBarService : ITopBarService
+    class PermissionRequestService : IPermissionRequestService
     {
-        public void PrepareTopBar(params object[] element)
+        public void RequestManualPermission(Permissions.BasePermission permission)
         {
-            Grid.SetColumnSpan(element[0] as Frame, 1);
+            
         }
     }
 }

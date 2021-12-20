@@ -12,14 +12,16 @@ using TugasAkhir_GCS.Droid.Services;
 using TugasAkhir_GCS.Interfaces;
 using Xamarin.Forms;
 
-[assembly: Dependency(typeof(TopBarService))]
+[assembly: Dependency(typeof(SerialPortService))]
 namespace TugasAkhir_GCS.Droid.Services
 {
-    class TopBarService : ITopBarService
+    class SerialPortService : ISerialPortService
     {
-        public void PrepareTopBar(params object[] element)
+        public event SerialDataReceived DataReceived;
+
+        public void ListSerialPorts()
         {
-            Grid.SetColumnSpan(element[0] as Frame, 1);
+            
         }
     }
 }

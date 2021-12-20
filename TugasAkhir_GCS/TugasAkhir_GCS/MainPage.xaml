@@ -5,12 +5,21 @@
              xmlns:local="clr-namespace:TugasAkhir_GCS"
              xmlns:Maps="clr-namespace:Xamarin.Forms.GoogleMaps;assembly=Xamarin.Forms.GoogleMaps">
     <ContentPage.Resources>
+        <ColumnDefinitionCollection x:Key="Cols">
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="35"/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="2*"/>
+        </ColumnDefinitionCollection>
         <OnPlatform x:Key="Columns" x:TypeArguments="ColumnDefinitionCollection">
             <On Platform="UWP">
                 <ColumnDefinitionCollection>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="35"/>
+                    <ColumnDefinition Width="50"/>
                     <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="2*"/>
@@ -22,7 +31,7 @@
                 <ColumnDefinitionCollection>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="35"/>
+                    <ColumnDefinition Width="50"/>
                     <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="2*"/>
@@ -33,11 +42,11 @@
         
         <OnPlatform x:Key="IMU_Dial" x:TypeArguments="x:Double">
             <On Platform="UWP" Value="250"/>
-            <On Platform="Android" Value="90"/>
+            <On Platform="Android" Value="150"/>
         </OnPlatform>
         <OnPlatform x:Key="AUX_Dial" x:TypeArguments="x:Double">
             <On Platform="UWP" Value="125"/>
-            <On Platform="Android" Value="45"/>
+            <On Platform="Android" Value="75"/>
         </OnPlatform>
         <OnPlatform x:Key="TopBar_Margin" x:TypeArguments="Thickness">
             <On Platform="UWP" Value="0,-32,0,0"/>
@@ -45,59 +54,52 @@
         </OnPlatform>
     </ContentPage.Resources>
     
-    <StackLayout>
-        <Frame BackgroundColor="#FFFFFF" CornerRadius="16" Margin="{StaticResource Key=TopBar_Margin}" Padding="0,4" VerticalOptions="Start">
-            <Frame BackgroundColor="#00879D" CornerRadius="16" Padding="0" Margin="0">
-                <Grid x:Name="TopBarGrid" Margin="0,28,0,0" Padding="0,4" ColumnDefinitions="{StaticResource Key=Columns}">
-                    <Label Grid.Column="0" Text="TA GCS" TextColor="White" FontFamily="Bebas" FontSize="Title" CharacterSpacing="1" HorizontalTextAlignment="Center" HorizontalOptions="Center" VerticalOptions="Center"/>
-                    <Frame Grid.Column="3" BackgroundColor="Transparent" BorderColor="White" Padding="0" HorizontalOptions="FillAndExpand">
-                        <Label Text="flight mode" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="Center" VerticalOptions="Center"/>
-                    </Frame>
-                    <Label Grid.Column="4" Text="t+00:00:00" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
-                    <Label Grid.Column="5" Text="rssi 100%" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
-                    <Label Grid.Column="6" Text="batt 100%" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+    <Grid x:Name="MainAppGrid">
+        <StackLayout>
+            <Frame BackgroundColor="#FFFFFF" CornerRadius="16" Margin="{StaticResource Key=TopBar_Margin}" Padding="0,4" VerticalOptions="Start">
+                <Frame BackgroundColor="#00879D" CornerRadius="16" Padding="0" Margin="0">
+                    <Grid Margin="0,28,0,0" Padding="2" ColumnDefinitions="{StaticResource Key=Columns}">
+                        <Label Grid.Column="0" Text="TA GCS" TextColor="White" FontFamily="Bebas" FontSize="Title" CharacterSpacing="1" HorizontalTextAlignment="Center" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        <Frame Grid.Column="3" BackgroundColor="Transparent" BorderColor="White" Padding="0" HorizontalOptions="FillAndExpand">
+                            <Label Text="flight mode" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Frame>
+                        <Label Grid.Column="4" Text="t+00:00:00" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                        <Label Grid.Column="5" Text="rssi 100%" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                        <Label Grid.Column="6" Text="batt 100%" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
 
-                    <OnPlatform x:TypeArguments="Frame">
-                        <On Platform="UWP">
-                            <Frame x:Name="TitleBar" Grid.Column="0" Grid.ColumnSpan="7" BackgroundColor="Transparent" Padding="0" Margin="0"/>
-                        </On>
-                    </OnPlatform>
+                        <Frame x:Name="TitleBar" Grid.Column="0" Grid.ColumnSpan="7"  BackgroundColor="Transparent" Padding="0" Margin="-4" CornerRadius="0"/>
 
-                    <Frame Grid.Column="1" BackgroundColor="Red" Padding="0" VerticalOptions="FillAndExpand">
-                        <Label Text="disconnected" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" HorizontalOptions="Center" VerticalOptions="Center"/>
-                    </Frame>
-                    <Frame Grid.Column="2" BackgroundColor="Gray" Padding="0" VerticalOptions="FillAndExpand">
-                        <Image HorizontalOptions="Center" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.logo.png}" Aspect="AspectFill" WidthRequest="20" VerticalOptions="Center"/>
-                    </Frame>
-                    
-                    <StackLayout  Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
-                        
-                    </StackLayout>
-                </Grid>
+                        <Button Grid.Column="1" BackgroundColor="Red" Text="disconnected" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" Clicked="Connection_Clicked" CornerRadius="4"/>
+                        <ImageButton Grid.Column="2" Clicked="Toggle_ConnSettings" BackgroundColor="DarkSlateBlue" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.settings.png}" Aspect="AspectFill" CornerRadius="4" Padding="2"/>
+                    </Grid>
+                </Frame>
             </Frame>
-        </Frame>
-        <Grid VerticalOptions="FillAndExpand" HorizontalOptions="CenterAndExpand" Margin="0" Padding="0,-5,0,0">
-            <Maps:Map x:Name="Map" InitialCameraUpdate="-2.46625,117.996111,5.25" MapType="Satellite"/>
             
-            <StackLayout Padding="5" Orientation="Vertical" VerticalOptions="End" HorizontalOptions="Center">
-                <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
-                    <Frame Padding="5" BorderColor="White" BackgroundColor="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}">
-                        <Label Text="KESTABILAN" HorizontalTextAlignment="Center" HorizontalOptions="CenterAndExpand"/>
-                    </Frame>
-                    <Frame Padding="5" BorderColor="White" BackgroundColor="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}">
-                        <Label Text="WAKTU KEMBALI" HorizontalTextAlignment="Center" HorizontalOptions="CenterAndExpand"/>
+            <Grid VerticalOptions="FillAndExpand" HorizontalOptions="CenterAndExpand" Margin="0" Padding="0,-5,0,0">
+                <Maps:Map x:Name="Map" InitialCameraUpdate="-2.46625,117.996111,5.25" MapType="Satellite"/>
+            
+                <StackLayout Padding="5" Orientation="Vertical" VerticalOptions="End" HorizontalOptions="Center">
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
+                        <Frame Padding="5" BorderColor="White" BackgroundColor="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}">
+                            <Label Text="KESTABILAN" HorizontalTextAlignment="Center" HorizontalOptions="CenterAndExpand"/>
+                        </Frame>
+                        <Frame Padding="5" BorderColor="White" BackgroundColor="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}">
+                            <Label Text="WAKTU KEMBALI" HorizontalTextAlignment="Center" HorizontalOptions="CenterAndExpand"/>
+                        </Frame>
+                    </StackLayout>
+                    <Frame HorizontalOptions="Center" Padding="5" BorderColor="LightSlateGray" BackgroundColor="White">
+                        <StackLayout Orientation="Horizontal">
+                            <Ellipse Fill="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}" HeightRequest="{StaticResource Key=IMU_Dial}" Aspect="Uniform" VerticalOptions="Center"/>
+                            <StackLayout Orientation="Vertical" VerticalOptions="Center">
+                                <Ellipse Fill="DimGray" Aspect="Uniform" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>
+                                <Ellipse Fill="DimGray" Aspect="Uniform" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>
+                            </StackLayout>
+                        </StackLayout>
                     </Frame>
                 </StackLayout>
-                <Frame HorizontalOptions="Center" Padding="5" BorderColor="LightSlateGray" BackgroundColor="White">
-                    <StackLayout Orientation="Horizontal">
-                        <Ellipse Fill="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}" HeightRequest="{StaticResource Key=IMU_Dial}" Aspect="Uniform" VerticalOptions="Center"/>
-                        <StackLayout Orientation="Vertical" VerticalOptions="Center">
-                            <Ellipse Fill="DimGray" Aspect="Uniform" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>
-                            <Ellipse Fill="DimGray" Aspect="Uniform" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>
-                        </StackLayout>
-                    </StackLayout>
-                </Frame>
-            </StackLayout>
-        </Grid>
-    </StackLayout>
+            </Grid>
+        </StackLayout>
+
+        <local:ConnectionSettings x:Name="ConnSettings" Confirmed="ConnSettings_Confirmed" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand"/>
+    </Grid>
 </ContentPage>

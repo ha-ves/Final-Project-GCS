@@ -20,7 +20,7 @@ namespace TugasAkhir_GCS.UWP.Services
         public void PrepareTopBar(params object[] element)
         {
             CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
-            Window.Current.SetTitleBar((element[1] as View).GetOrCreateRenderer().GetNativeElement());
+            Window.Current.SetTitleBar((element[0] as View).GetOrCreateRenderer().GetNativeElement());
 
             var titleBar = ApplicationView.GetForCurrentView().TitleBar;
             titleBar.ButtonBackgroundColor = Colors.Transparent;

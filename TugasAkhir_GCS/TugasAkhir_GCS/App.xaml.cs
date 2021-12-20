@@ -1,4 +1,5 @@
 ﻿using System;
+using TugasAkhir_GCS.Interfaces;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
