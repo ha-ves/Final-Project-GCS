@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Pigeon_GCS\Pigeon_WPF_cs\mavlink.net-protocol_upgrade\mavlink.net\mavlink.net.csproj" />
+    <ProjectReference Include="..\mavlink.net\mavlink.net.csproj" />
   </ItemGroup>
 
   <ItemGroup>

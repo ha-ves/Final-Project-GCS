@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TugasAkhir_GCS.Android", "T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TugasAkhir_GCS", "TugasAkhir_GCS\TugasAkhir_GCS\TugasAkhir_GCS.csproj", "{0FBEBCE4-4B74-4AEE-AE9A-0FC08481C369}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mavlink.net", "..\Pigeon_GCS\Pigeon_WPF_cs\mavlink.net-protocol_upgrade\mavlink.net\mavlink.net.csproj", "{2DFF5E5B-EB22-4C03-BEC9-994B112B8E78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mavlink.net", "TugasAkhir_GCS\mavlink.net\mavlink.net.csproj", "{2DFF5E5B-EB22-4C03-BEC9-994B112B8E78}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
