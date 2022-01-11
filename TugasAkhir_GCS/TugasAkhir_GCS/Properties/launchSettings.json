@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TugasAkhir_GCS": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

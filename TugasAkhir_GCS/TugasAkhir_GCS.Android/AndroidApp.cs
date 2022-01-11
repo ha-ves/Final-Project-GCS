@@ -13,8 +13,6 @@ using Android.Widget;
 namespace TugasAkhir_GCS.Droid
 {
     [Application]
-    [MetaData("com.google.android.geo.API_KEY",
-        Value = Variables.GOOGLE_MAPS_ANDROID_API_KEY)]
     class AndroidApp : Application
     {
         public AndroidApp(IntPtr javaReference, JniHandleOwnership transfer)

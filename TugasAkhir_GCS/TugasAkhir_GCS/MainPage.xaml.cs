@@ -16,254 +16,366 @@ using MavLinkNet;
 using TugasAkhir_GCS.Interfaces;
 using Xamarin.Essentials;
 using Xamarin.Forms;
-using Xamarin.Forms.GoogleMaps;
 using Xamarin.Forms.Xaml;
 
 namespace TugasAkhir_GCS
 {
-    [XamlCompilation(XamlCompilationOptions.Skip)]
     public partial class MainPage : ContentPage, INotifyPropertyChanged
     {
-        string _connectBtn_Text = "Connect";
-        public string ConnectBtn_Text { get { return _connectBtn_Text; } set { _connectBtn_Text = value; OnPropertyChanged("ConnectBtn_Text"); } }
+        /* Connection variables */
+        ConnectionArgs CurrentConnection;
+        bool IsConnected = false;
 
-        AesManaged enc, dec;
+        /* Flight data variables */
+        string _flightMode = "offline";
+        public string FlightMode { get => _flightMode; }
 
-        ConnectionArgs ConnectionArgs;
+        string _battPercent = "batt : n/a %";
+        public string BattPercent { get => _battPercent; }
 
-        MavLinkTCPClientTransport MavLinkTCPTransport;
+        string _signalPercent = "rssi : n/a %";
+        public string SignalPercent { get => _signalPercent; }
+
+        string _flightTime = "t+00:00:00.00";
+        public string FlightTime { get => _flightTime; }
+
+        System.Timers.Timer FlightTimer;
+
+        /* Kestabilan terbang variables */
+        List<double> LastSamples = new List<double>();
+        const int samples = 10;
+
+        /* Other variables */
+        bool useCompass = true;
 
         public MainPage()
         {
+            BindingContext = this;
             InitializeComponent();
 
-            BindingContext = this;
+            test.Elapsed += Elapsed;
         }
 
-        protected override void OnAppearing()
+        #region Loading Overlay Control
+
+        public void ShowLoadingOverlay(string message = "")
         {
-            base.OnAppearing();
-
-            new Thread(async () => await WIFIThreadEntry()).Start();
-
-            DependencyService.Get<ITopBarService>().PrepareTopBar(TitleBar);
+            LoadingOverlay.IsVisible = true;
+            LoadingAct.IsRunning = true;
+            LoadingMessage.Text = message;
         }
 
-        private void ConnSettings_Confirmed(object sender, ConnectionArgs configs)
+        public void ChangeLoadingOverlay(string message)
         {
-            
+            LoadingMessage.Text = message;
         }
 
-        Channel<List<byte>> AESChannel = Channel.CreateUnbounded<List<byte>>();
-
-        AutoResetEvent MavLinKConnValid = new AutoResetEvent(false);
-
-        private async Task WIFIThreadEntry()
+        public void HideLoadingOverlay()
         {
-            Thread.CurrentThread.Name = "WIFI THREAD";
+            LoadingOverlay.IsVisible = false;
+            LoadingAct.IsRunning = false;
+            LoadingMessage.Text = "";
+        }
 
-            List<NetworkInterface> interfaces = new List<NetworkInterface>(NetworkInterface.GetAllNetworkInterfaces().Where(intf => intf.OperationalStatus == OperationalStatus.Up && (intf.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || intf.Name.Contains("wlan"))));
-            if (interfaces.Count == 0)
+        #endregion
+
+        #region Update UI
+
+        public void UpdateUI(UasMessage msg)
+        {
+            switch (msg)
             {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    await DisplayAlert("ERROR : Perangkat tidak didukung!", "Perangkat anda tidak memiliki WIFI, Aplikasi GCS tidak bisa dijalankan!\n", "OK");
-                });
-            }
-
-            /*
-            WIFIClient = new TcpClient();
-
-            Debug.WriteLine($"Try Connecting to [ {gatewayIP.Address}:61258 ]");
-            if (await Task.WhenAny(WIFIClient.ConnectAsync(gatewayIP.Address, 61258), Task.Delay(1000)) != null && WIFIClient.Connected)
-            {
-                Debug.WriteLine($"Connected to {WIFIClient.Client.RemoteEndPoint}");
-
-                MavLinkTCPTransport = new MavLinkTCPClientTransport()
-                {
-                    Socket = WIFIClient.Client,
-                    MavlinkSystemId = 255,
-                    MavlinkComponentId = (byte)MavComponent.MavCompIdMissionplanner,
-                    WireProtocolVersion = WireProtocolVersion.v10,
-                    HeartBeatUpdateRateMs = 5000,
-                };
-
-                PacketReceivedDelegate p = null;
-                p = delegate (object sender, MavLinkPacketBase packet)
-                {
-                    MavLinKConnValid.Set();
-                    MavLinkTCPTransport.OnPacketReceived -= p;
-                };
-
-                MavLinkTCPTransport.OnPacketReceived += p;
-                MavLinkTCPTransport.Initialize();
-
-                if (MavLinKConnValid.WaitOne(5000))
-                {
-                    Debug.WriteLine("The MavLink Connection is Valid.");
-                    MavLinkTCPTransport.OnPacketReceived += MavlinkMessageReceived;
-                }
-            }
-            */
-
-            while (true)
-            {
-                var data = await AESChannel.Reader.ReadAsync();
-
-                Debug.Write($"new Data available :\nHEX -> ");
-                data.ForEach(item =>
-                {
-                    Debug.Write($" {item:X2} ");
-                });
-                Debug.WriteLine(" |END");
-            }
-        }
-
-        
-
-        private void AES_Method()
-        {
-            enc = new AesManaged();
-            enc.Key = Encoding.ASCII.GetBytes("finalproject2022");
-
-            dec = new AesManaged();
-            dec.Key = Encoding.ASCII.GetBytes("finalproject2022");
-        }
-
-        #region MAVLINK
-
-        List<byte> DummyBuffer = new List<byte>() { 0xfd, 0x10, 0x00, 0x00, 0x3a, 0x00, 0xc8, 0x1e, 0x00, 0x00, 0xbd, 0x12, 0x01, 0x00, 0x83, 0xa1, 0xe9, 0xbb, 0xb4, 0x2d, 0x4b, 0xbc, 0x37, 0xd0, 0xaa, 0x3f, 0x0e, 0xa6 };
-
-        private void MavlinkMessageReceived(object sender, MavLinkPacketBase packet)
-        {
-            Debug.WriteLine("New mavlink data parsed");
-
-            switch (packet.Message)
-            {
-                case UasAttitude attitude:
-                    Debug.WriteLine($"new {packet.Message.GetType().Name} message with YPR: {attitude.Yaw * 180 / Math.PI:0.00} | {attitude.Pitch * 180 / Math.PI:0.00} | {attitude.Roll * 180 / Math.PI:0.00}");
+                case UasSysStatus SysStat:
+                    UpdateBatt(SysStat.BatteryRemaining);
+                    UpdateSignal(SysStat.DropRateComm);
+                    break;
+                case UasGlobalPositionInt Gps:
+                    UpdateGPS(Gps.Lat, Gps.Lon);
+                    UpdateBearing(Gps.Hdg);
+                    break;
+                case UasAttitude Att:
+                    UpdateAtt(Att.Yaw, Att.Pitch, Att.Roll);
+                    UpdateKestabilanTerbang();
+                    break;
+                case UasHeartbeat HrtBt:
+                    Debug.WriteLine($"New {msg}");
+                    UpdateFlightMode(HrtBt.SystemStatus);
                     break;
                 default:
-                    Debug.WriteLine($"Mavlink {packet.Message.GetType().Name} message is not supported by this GCS");
                     break;
             }
         }
 
-        private Task GetMavLinkStreams()
+        private void UpdateFlightMode(MavState state)
         {
-            UasCommandLong UasCommand;
+            _flightMode = Enum.GetName(typeof(MavState), state);
+            OnPropertyChanged("FlightMode");
+        }
 
-            UasCommand = new UasCommandLong()
+        private void UpdateAtt(float yawRad, float pitchRad, float rollRad)
+        {
+            LastSamples.Add(rollRad * 180.0 / Math.PI);
+
+            if (LastSamples.Count > samples)
+                LastSamples.RemoveAt(0);
+
+            IMU_Avionic.UpdateUI(pitchRad, rollRad);
+
+            if(!useCompass)
+                MapView.UpdateBearing((float)(((yawRad * 180.0 / Math.PI) + 360.0) % 360));
+        }
+
+        private void UpdateKestabilanTerbang()
+        {
+            if (LastSamples.Count < samples)
+                return;
+
+            int sigmaX = 0;
+            int sigma_XSquare = 0;
+
+            var sigmaY = LastSamples.Sum();
+            var sigmaXY = 0d;
+
+            for (int i = 0; i < samples; i++)
             {
-                TargetSystem = 1,
-                TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
-                Command = MavCmd.SetMessageInterval,
-                Param1 = new UasHeartbeat().MessageId,
-                Param2 = 2000000
-            };
+                sigmaX += i + 1;
+                sigma_XSquare += (i + 1) * (i + 1);
+                sigmaXY += (i + 1) * LastSamples[i];
+            }
 
-            MavLinkTCPTransport.SendMessage(UasCommand);
+            var grad = ((samples * sigmaXY) - (sigmaX * sigmaY)) / ((samples * sigma_XSquare) - (sigmaX * sigmaX)) * 2;
 
-            UasCommand = new UasCommandLong()
+            //Debug.WriteLine($"Kestabian : m = {grad}");
+
+            var m = Math.Abs(grad);
+            Dispatcher.BeginInvokeOnMainThread(() =>
             {
-                TargetSystem = 1,
-                TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
-                Command = MavCmd.SetMessageInterval,
-                Param1 = new UasSysStatus().MessageId,
-                Param2 = 2000000
-            };
+                if (m >= 10)
+                {
+                    Kestabilan.IsVisible = true;
+                    Kestabilan.BackgroundColor = Color.Red;
+                    (Kestabilan.Content as Label).Text = "Sangat miring";
+                    (Kestabilan.Content as Label).TextColor = Color.White;
+                }
+                else if (5 < m && m < 10)
+                {
+                    Kestabilan.IsVisible = true;
+                    Kestabilan.BackgroundColor = Color.Yellow;
+                    (Kestabilan.Content as Label).Text = "Miring";
+                    (Kestabilan.Content as Label).TextColor = Color.Black;
+                }
+                else
+                    Kestabilan.IsVisible = false;
 
-            MavLinkTCPTransport.SendMessage(UasCommand);
+                if (grad < 0)
+                    (Kestabilan.Content as Label).Text += " Ke Kiri";
+                else
+                    (Kestabilan.Content as Label).Text += " Ke Kanan";
+            });
+        }
 
-            UasCommand = new UasCommandLong()
-            {
-                TargetSystem = 1,
-                TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
-                Command = MavCmd.SetMessageInterval,
-                Param1 = new UasGlobalPositionInt().MessageId,
-                Param2 = 1000000
-            };
+        private void UpdateGPS(int lat, int lon)
+        {
+            //lat = -74107080 + new Random().Next(-200, 200);
+            //lon = 1127047190 + new Random().Next(-200, 200);
 
-            MavLinkTCPTransport.SendMessage(UasCommand);
+            if (lat == int.MinValue || lon == int.MinValue)
+                return;
 
-            UasCommand = new UasCommandLong()
-            {
-                TargetSystem = 1,
-                TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
-                Command = MavCmd.SetMessageInterval,
-                Param1 = new UasAttitude().MessageId,
-                Param2 = 200000
-            };
+            MapView.UpdateGPS(lat, lon);
+        }
 
-            MavLinkTCPTransport.SendMessage(UasCommand);
+        private void UpdateBearing(ushort hdg)
+        {
+            if (hdg == ushort.MaxValue || !useCompass)
+                return;
 
-            UasCommand = new UasCommandLong()
-            {
-                TargetSystem = 1,
-                TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
-                Command = MavCmd.SetMessageInterval,
-                Param1 = new UasVfrHud().MessageId,
-                Param2 = 200000
-            };
+            MapView.UpdateBearing((float)((hdg - 9000 + 36000) % 36000 / 100.0));
+        }
 
-            MavLinkTCPTransport.SendMessage(UasCommand);
+        private void UpdateBatt(sbyte batteryRemaining)
+        {
+            _battPercent = $"batt : {batteryRemaining} %";
+            OnPropertyChanged("BattPercent");
+        }
 
-            return Task.FromResult(true);
+        private void UpdateSignal(ushort dropRateComm)
+        {
+            _signalPercent = $"rssi : {100.0 - (dropRateComm / 100.0):0.00} %";
+            OnPropertyChanged("SignalPercent");
         }
 
         #endregion
 
         #region Button events
 
-        private async void Connection_Clicked(object sender, EventArgs e)
+        private void ConnSettings_Confirmed(object sender, ConnectionArgs ConnArgs)
         {
-            await AESChannel.Writer.WriteAsync(DummyBuffer);
+            CurrentConnection = ConnArgs;
+            ConnectBtn.IsEnabled = true;
+            ConnectBtn.BackgroundColor = Color.Red;
         }
 
         private void Toggle_ConnSettings(object sender, EventArgs e)
         {
-            ConnSettings.IsVisible = !ConnSettings.IsVisible;
+            if (!ConnSettings.IsVisible)
+            {
+                ConnSettings.ShowPanel();
+                ConnectBtn.IsEnabled = false;
+                ConnectBtn.BackgroundColor = Color.DarkSlateGray;
+            }
+            else
+            {
+                ConnSettings.ClosePanel();
+                ConnectBtn.IsEnabled = true;
+                ConnectBtn.BackgroundColor = Color.Red;
+            }
         }
 
-        private void Button_Clicked(object sender, EventArgs e)
-        { 
-            // Prepare encryption
-            string plain = "test1234";
-            List<byte> cipher = new List<byte>();
-            List<byte> msg_to_send = new List<byte>();
-            enc.GenerateIV();
-
-            // Create the streams used for encryption.
-            using (MemoryStream msEncrypt = new MemoryStream())
+        private async void Connection_Clicked(object sender, EventArgs e)
+        {
+            if (!IsConnected)
             {
-                using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, enc.CreateEncryptor(), CryptoStreamMode.Write))
+                var valid = false;
+
+                ConnSettingBtn.IsEnabled = false;
+                
+                (sender as Button).Text = "Connecting";
+                (sender as Button).IsEnabled = false;
+                (sender as Button).BackgroundColor = Color.DarkGray;
+
+                ShowLoadingOverlay("Menyambungkan UAV . . .");
+
+                switch (CurrentConnection.ConnType)
                 {
-                    using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
-                    {
-                        //Write all data to the stream.
-                        swEncrypt.Write(plain);
-                    }
-                    cipher = msEncrypt.ToArray().ToList();
-                    msg_to_send.AddRange(enc.IV);
-                    msg_to_send.AddRange(cipher);
+                    case ConnectionType.USB:
+                        
+
+                        var COM = CurrentConnection.Config["COM"] as string;
+                        if (!COM.Contains("COM"))
+                        {
+                            if (!await DisplayAlert("COM Port tidak valid :", COM, "OK", "Ubah"))
+                                ConnSettings.ShowPanel();
+                            break;
+                        }
+
+                        valid = true;
+
+                        if (!await Task.Run(() => (App.Current as App).ReceiverService.ConnectTo(COM, CurrentConnection.Config["Baudrate"] as string)))
+                            break;
+
+                        IsConnected = true;
+                        
+                        break;
+                    case ConnectionType.WIFI:
+                        if (await Permissions.RequestAsync<Permissions.NetworkState>() != PermissionStatus.Granted)
+                            return;
+
+                        var IP = CurrentConnection.Config["IP"] as string;
+                        var Port = CurrentConnection.Config["Port"] as string;
+                        ushort PortNum = 0;
+
+                        if (IP.Count(dot => dot == '.') < 3)
+                        {
+                            if (!await DisplayAlert("IP Address tidak valid :", (IP == "") ? "<Tidak ada IP Address>" : IP, "OK", "Ubah"))
+                                ConnSettings.ShowPanel();
+                            break;
+                        }
+                        else if (!ushort.TryParse(Port, out PortNum))
+                        {
+                            if (!await DisplayAlert("Port tidak valid :", (Port == "") ? "<Tidak ada Port>" : Port, "OK", "Ubah"))
+                                ConnSettings.ShowPanel();
+                            break;
+                        }
+
+                        valid = true;
+
+                        if (!await Task.Run(() => ((App.Current as App).ReceiverService as WIFIService).ConnectTo(IP, PortNum)))
+                            break;
+
+                        IsConnected = true;
+                        
+                        break;
+                    default:
+                        break;
                 }
+
+                if (IsConnected)
+                {
+                    StartFlightTimer();
+
+                    (sender as Button).Text = "Connected";
+                    (sender as Button).BackgroundColor = Color.Green;
+                }
+                else
+                {
+                    if(valid)
+                        await DisplayAlert("Gagal terhubung ke UAV", "UAV tidak ditemukan.", "OK");
+
+                    (sender as Button).Text = "Disconnected";
+                    (sender as Button).BackgroundColor = Color.Red;
+
+                    ConnSettingBtn.IsEnabled = true;
+                }
+                (sender as Button).IsEnabled = true;
+            }
+            else
+            {
+                if (!await DisplayAlert("Anda akan memutuskan koneksi UAV", "Anda menekan tombol Disconnect, apakah anda yakin?", "YA, DISCONNECT", "Batal"))
+                    return;
+
+                (sender as Button).Text = "Disconnecting";
+                (sender as Button).IsEnabled = false;
+                (sender as Button).BackgroundColor = Color.DarkBlue;
+
+                ShowLoadingOverlay("Memutuskan koneksi UAV . . .");
+
+                if (!await (App.Current as App).ReceiverService.Disconnect())
+                    return;
+                if ((App.Current as App).MavLinkTransport != null)
+                    (App.Current as App).MavLinkTransport.Dispose();
+
+                IsConnected = false;
+
+                if (IsConnected)
+                {
+                    (sender as Button).Text = "Connected";
+                    (sender as Button).BackgroundColor = Color.Green;
+                }
+                else
+                {
+                    StopFlightTimer();
+
+                    (sender as Button).Text = "Disconnected";
+                    (sender as Button).BackgroundColor = Color.Red;
+
+                    ConnSettingBtn.IsEnabled = true;
+                }
+                (sender as Button).IsEnabled = true;
             }
 
-            // Prepare for encryption
-            dec.IV = msg_to_send.Take(16).ToArray();
+            HideLoadingOverlay();
+        }
 
-            // Create the streams used for decryption.
-            using (MemoryStream msDecrypt = new MemoryStream(msg_to_send.Skip(16).ToArray()))
+        private void StartFlightTimer()
+        {
+            var StartTime = DateTime.Now;
+            FlightTimer = new System.Timers.Timer(50);
+            FlightTimer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) =>
             {
-                using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, dec.CreateDecryptor(), CryptoStreamMode.Read))
-                {
-                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                    {
-                        // Read the decrypted bytes from the decrypting stream
-                        // and place them in a string.
-                        
-                    }
-                }
+                _flightTime = "t+" + (DateTime.Now - StartTime).ToString("hh\\:mm\\:ss\\.ff");
+                OnPropertyChanged("FlightTime");
+            };
+            FlightTimer.Start();
+        }
+
+        private void StopFlightTimer()
+        {
+            if(FlightTimer != null)
+            {
+                FlightTimer.Stop();
+                FlightTimer.Dispose();
+                FlightTimer = null;
             }
         }
 
@@ -289,11 +401,196 @@ namespace TugasAkhir_GCS
             else
             {
                 await DisplayAlert("Location access granted", "Thank your for allowing Location access", "Continue");
-                Map.UiSettings.MyLocationButtonEnabled = true;
-                Map.MyLocationEnabled = true;
+                //Map.UiSettings.MyLocationButtonEnabled = true;
+                //Map.MyLocationEnabled = true;
             }
         }
 
         #endregion
+
+        #region AES Testing
+
+        private async void Button_Clicked(object sender, EventArgs e)
+        {
+            ShowLoadingOverlay("Testing AES");
+
+            await Task.Run(() =>
+            {
+                Thread.CurrentThread.Name = "AES Test Thread";
+
+                (App.Current as App).InitializeAES();
+
+                var timer = Stopwatch.StartNew();
+
+                for (int i = 0; i < 1000000; i++)
+                {
+                    (App.Current as App).EncryptAndGetCipherBytes((App.Current as App).DummyBuf.ToArray());
+                }
+
+                timer.Stop();
+                Debug.WriteLine($"1 mil Encryption took {timer.ElapsedMilliseconds} ms / {timer.ElapsedTicks} ticks");
+
+                var dummyCipher = (App.Current as App).EncryptAndGetCipherBytes((App.Current as App).DummyBuf.ToArray());
+
+                timer = Stopwatch.StartNew();
+
+                for (int i = 0; i < 1000000; i++)
+                {
+                    (App.Current as App).DecryptAndGetPlainBytes(dummyCipher);
+                }
+
+                timer.Stop();
+                Debug.WriteLine($"1 mil Decryption took {timer.ElapsedMilliseconds} ms / {timer.ElapsedTicks} ticks");
+
+                var decrypted = (App.Current as App).DecryptAndGetPlainBytes(dummyCipher);
+
+                Debug.Write("Decrypted data -> [");
+                foreach (var item in decrypted)
+                {
+                    Debug.Write($" {item:X2} ");
+                }
+                Debug.WriteLine("]");
+            });
+
+            HideLoadingOverlay();
+        }
+
+        #endregion
+
+        #region MavLink Dump
+
+        private async void Button_Clicked_1(object sender, EventArgs e)
+        {
+            ShowLoadingOverlay($"Dumping MavLink AES...");
+
+            var timers = new List<Timer>()
+            {
+                // heartbeat
+                new Timer((state) =>
+                {
+                    var msg = new UasHeartbeat()
+                    {
+                        Type = MavType.Quadrotor,
+                        Autopilot = MavAutopilot.Generic,
+                        BaseMode = MavModeFlag.SafetyArmed | MavModeFlag.ManualInputEnabled | MavModeFlag.StabilizeEnabled,
+                        SystemStatus = MavState.Standby,
+                    };
+                    (App.Current as App).MavLinkTransport.SendMessage(msg);
+                }, null, 0, 2000),
+
+                //sys status
+                new Timer((state) =>
+                {
+                    var battmv = new Random().Next(11500, 12600);
+                    (App.Current as App).MavLinkTransport.SendMessage(new UasSysStatus()
+                    {
+                        OnboardControlSensorsPresent = 0,
+                        OnboardControlSensorsEnabled = 0,
+                        OnboardControlSensorsHealth = 0,
+                        Load = (ushort)new Random().Next(0, 1000),
+                        VoltageBattery = (ushort)battmv,
+                        CurrentBattery = -1,
+                        BatteryRemaining = (sbyte)(battmv / 12600 * 100),
+                        DropRateComm = 0,
+                        ErrorsComm = 0,
+                        ErrorsCount1 = 0,
+                        ErrorsCount2 = 0,
+                        ErrorsCount3 = 0,
+                        ErrorsCount4 = 0,
+                    });
+                }, null, 0, 2000),
+
+                //gps
+                new Timer((state) =>
+                {
+                    (App.Current as App).MavLinkTransport.SendMessage(new UasGlobalPositionInt()
+                    {
+                        TimeBootMs = 1,
+                        Lat = -74107080,
+                        Lon = 1127047190,
+                        Alt = new Random().Next(5800, 6200),
+                        RelativeAlt = new Random().Next(90, 110),
+                        Vx = 0,
+                        Vy = 0,
+                        Vz = 0,
+                        Hdg = UInt16.MaxValue
+                    });
+                }, null, 0, 2000),
+
+                //attitude
+                new Timer((state) =>
+                {
+                    (App.Current as App).MavLinkTransport.SendMessage(new UasAttitude()
+                    {
+                        TimeBootMs = 1,
+                        Roll = (float)(new Random().Next(-100, 100) / 36000.0 * Math.PI),
+                        Pitch = (float)(new Random().Next(-100, 100) / 36000.0 * Math.PI),
+                        Yaw = (float)(new Random().Next(-100, 100) / 36000.0 * Math.PI),
+                        Rollspeed = 0,
+                        Pitchspeed = 0,
+                        Yawspeed = 0,
+                    });
+                }, null, 0, 100),
+            };
+
+            for (int i = 10 - 1; i >= 0; i--)
+            {
+                await Task.Delay(1000);
+                ChangeLoadingOverlay($"Dumping MavLink AES, {i}s..");
+            }
+
+            timers.ForEach(timer =>
+            {
+                timer.Change(Timeout.Infinite, Timeout.Infinite);
+                timer.Dispose();
+            });
+
+            HideLoadingOverlay();
+        }
+
+        #endregion
+
+        #region Dummy Update UI
+
+        System.Timers.Timer test = new System.Timers.Timer(100);
+        bool Stopped = true;
+
+        private void Button_Clicked_2(object sender, EventArgs e)
+        {
+            if (Stopped)
+            {
+                test.Start();
+                Stopped = false;
+            }
+            else
+            {
+                test.Stop();
+                Stopped = true;
+            }
+        }
+
+        void Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            Dispatcher.BeginInvokeOnMainThread(() =>
+            {
+                var y = new Random().Next(-180, 180);
+                var p = new Random().Next(-90, 90);
+                var r = new Random().Next(-180, 180);
+
+                var lat = -74107080 + new Random().Next(-50, 50);
+                var lon = 1127047190 + new Random().Next(-50, 50);
+
+                var batt = (sbyte)(80 + new Random().Next(-3, 3));
+
+                UpdateAtt((float)(y * Math.PI / 180.0), (float)(p * Math.PI / 180.0), (float)(r * Math.PI / 180.0));
+                UpdateKestabilanTerbang();
+
+                UpdateGPS(lat, lon);
+
+                UpdateBatt(batt);
+            });
+        }
+
+    #endregion
     }
 }

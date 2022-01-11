@@ -180,18 +180,16 @@ namespace MavLinkNet
 
             if (signalMark != 0) bufferSize++;
 
-            byte[] result = new byte[bufferSize];
-
-            using (MemoryStream s = new MemoryStream(result))
+            using (MemoryStream s = new MemoryStream())
             {
                 using (BinaryWriter w = new BinaryWriter(s))
                 {
                     if (signalMark != 0) w.Write(signalMark);
                     p.Serialize(w);
                 }
-            }
 
-            return result;
+                return s.ToArray();
+            }
         }
                 
         public override void Serialize(BinaryWriter w)

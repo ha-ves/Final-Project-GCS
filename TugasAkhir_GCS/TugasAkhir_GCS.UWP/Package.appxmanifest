@@ -54,8 +54,13 @@
   </Applications>
 
   <Capabilities>
+	<uap:Capability Name="documentsLibrary"/>
     <Capability Name="internetClient"/>
-    <DeviceCapability Name="serialcommunication"/>
+	<DeviceCapability Name="serialcommunication">
+	    <Device Id="any">
+			<Function Type="name:serialPort"/>
+		</Device>
+	</DeviceCapability>
     <DeviceCapability Name="location"/>
   </Capabilities>
 </Package>

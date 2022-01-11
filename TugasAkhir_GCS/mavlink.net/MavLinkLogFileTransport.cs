@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace MavLinkNet
 {
-    public class MavLinkLogFileTransport: MavLinkGenericTransport
+    public class MavLinkLogFileTransport : MavLinkGenericTransport
     {
         private string mLogFileName;
 

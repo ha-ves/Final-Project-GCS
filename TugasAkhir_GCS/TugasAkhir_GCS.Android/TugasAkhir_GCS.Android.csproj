@@ -35,6 +35,7 @@
     <AndroidLinkMode>None</AndroidLinkMode>
     <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
     <MandroidI18n />
+    <AndroidSupportedAbis />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -58,19 +59,16 @@
   <ItemGroup>
     <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
     <PackageReference Include="Xamarin.Forms">
-      <Version>5.0.0.2244</Version>
-    </PackageReference>
-    <PackageReference Include="Xamarin.Forms.GoogleMaps">
-      <Version>4.0.0-BETA1</Version>
+      <Version>5.0.0.2291</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AndroidApp.cs" />
-    <Compile Include="CachingNativeBitmapDescriptorFactory.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\PermissionRequestService.cs" />
+    <Compile Include="Services\SerialListener.cs" />
     <Compile Include="Services\SerialPortService.cs" />
     <Compile Include="Services\TopBarService.cs" />
     <Compile Include="SplashActivity.cs" />
@@ -96,8 +94,14 @@
     <AndroidResource Include="Resources\mipmap-xxxhdpi\icon.png" />
     <AndroidResource Include="Resources\mipmap-xxxhdpi\launcher_foreground.png" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
+    <AndroidResource Include="Resources\drawable\splash_logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\JavaBinder\JavaBinder.csproj">
+      <Project>{6ba96408-8abb-42ba-978a-34d25277f382}</Project>
+      <Name>JavaBinder</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TugasAkhir_GCS\TugasAkhir_GCS.csproj">
       <Project>{61344135-E858-4F5B-ADAD-33C7CD746852}</Project>
       <Name>TugasAkhir_GCS</Name>
@@ -105,6 +109,12 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\splash_screen.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\xml\device_filter.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

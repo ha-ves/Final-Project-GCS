@@ -44,7 +44,7 @@ namespace TugasAkhir_GCS.UWP
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {
-                //this.DebugSettings.EnableFrameRateCounter = true;
+                this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
 
@@ -59,12 +59,7 @@ namespace TugasAkhir_GCS.UWP
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
-                var rendererAssemblies = new[]
-                {
-                    typeof(Xamarin.Forms.GoogleMaps.UWP.MapRenderer).GetTypeInfo().Assembly
-                };
-                Xamarin.Forms.Forms.Init(e, rendererAssemblies);
-                Xamarin.FormsGoogleMaps.Init(Variables.BING_MAPS_UWP_API_KEY);
+                Xamarin.Forms.Forms.Init(e);
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {

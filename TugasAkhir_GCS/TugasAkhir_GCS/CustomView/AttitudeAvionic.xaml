@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:TugasAkhir_GCS"
+             x:Class="TugasAkhir_GCS.CustomView.AttitudeAvionic">
+    <ContentView.Content>
+        <Frame Padding="5" BackgroundColor="#00879D" CornerRadius="{StaticResource IMU_Dial_Radius}">
+            <Frame Padding="0" CornerRadius="{StaticResource IMU_Dial_Radius}">
+                <Grid>
+                    <Image x:Name="Horizon" Rotation="{Binding Rotate}" TranslationX="{Binding TransX}" TranslationY="{Binding TransY}" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.Horizon_GroundSky.png}" Aspect="AspectFit" Scale="4.88" WidthRequest="{StaticResource Key=IMU_Dial}" VerticalOptions="Center" HorizontalOptions="Center"/>
+                    <Image x:Name="Maquette" Margin="0,0,7,0" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.Maquette_Avion.png}" Aspect="AspectFill" WidthRequest="{StaticResource Key=IMU_Dial}" VerticalOptions="Center" HorizontalOptions="Center"/>
+                </Grid>
+            </Frame>
+        </Frame>
+    </ContentView.Content>
+</ContentView>

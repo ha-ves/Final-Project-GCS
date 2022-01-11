@@ -3,6 +3,27 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TugasAkhir_GCS.App">
     <Application.Resources>
-
+        <OnPlatform x:Key="IMU_Dial_Radius" x:TypeArguments="x:Single">
+            <On Platform="UWP" Value="120"/>
+            <On Platform="Android" Value="90"/>
+        </OnPlatform>
+        <OnPlatform x:Key="AUX_Dial_Radius" x:TypeArguments="x:Single">
+            <On Platform="UWP" Value="60"/>
+            <On Platform="Android" Value="45"/>
+        </OnPlatform>
+        
+        <OnPlatform x:Key="IMU_Dial" x:TypeArguments="x:Double">
+            <On Platform="UWP" Value="240"/>
+            <On Platform="Android" Value="180"/>
+        </OnPlatform>
+        <OnPlatform x:Key="AUX_Dial" x:TypeArguments="x:Double">
+            <On Platform="UWP" Value="120"/>
+            <On Platform="Android" Value="90"/>
+        </OnPlatform>
+        
+        <OnPlatform x:Key="TopBar_Margin" x:TypeArguments="Thickness">
+            <On Platform="UWP" Value="0,-32,0,0"/>
+            <On Platform="Android" Value="0,-32,0,0"/>
+        </OnPlatform>
     </Application.Resources>
 </Application>

@@ -6,9 +6,9 @@ using System.Text;
 
 namespace MavLinkNet
 {
-    public delegate void PacketReceivedDelegate(object sender, MavLinkPacketBase packet);
+    public delegate void DataToSendDelegate(object sender, byte[] buffer);
 
-    public delegate void OtherPacketReceivedDelegate(object sender, byte[] Buffer);
+    public delegate void PacketReceivedDelegate(object sender, MavLinkPacketBase packet);
 
     public abstract class MavLinkGenericPacketWalker
     {
@@ -17,8 +17,6 @@ namespace MavLinkNet
                 {
                     0xFE,
                     0xFD,
-                    (byte)'T',
-                    (byte)'W'
                 });
 
         public static byte PacketSignalByte = byte.MinValue;

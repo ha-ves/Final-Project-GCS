@@ -1,7 +1,7 @@
 ﻿/*
 The MIT License (MIT)
 
-Copyright (c) 2013, David Suarez
+Copyright (c) 2014, Håkon K. Olafsen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,43 +22,49 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 using System;
-using System.IO;
-using System.Net;
 using System.Threading;
-using System.Net.Sockets;
 using System.Collections.Concurrent;
 
 namespace MavLinkNet
 {
-    public class MavLinkUdpTransport: MavLinkGenericTransport
+    public class MavLinkDefaultTransport : MavLinkGenericTransport
     {
-        public int UdpListeningPort = 0;  // Any available port
-        public int UdpTargetPort = 14550;
-        public IPAddress TargetIpAddress = new IPAddress(new byte[] { 127, 0, 0, 1 });
         public int HeartBeatUpdateRateMs = 1000;
-        
+        public WireProtocolVersion WireProtocolVersion;
+
         private ConcurrentQueue<byte[]> mReceiveQueue = new ConcurrentQueue<byte[]>();
         private ConcurrentQueue<UasMessage> mSendQueue = new ConcurrentQueue<UasMessage>();
+        
         private AutoResetEvent mReceiveSignal = new AutoResetEvent(true);
         private AutoResetEvent mSendSignal = new AutoResetEvent(true);
-        private MavLinkAsyncWalker mMavLink = new MavLinkAsyncWalker();
-        private UdpClient mUdpClient;
-        private bool mIsActive = true;
 
+        private MavLinkAsyncWalker mMavLink = new MavLinkAsyncWalker();
+
+        private bool mIsActive = true;
 
         public override void Initialize()
         {
+            InitializeProtocolVersion(WireProtocolVersion);
             InitializeMavLink();
-            InitializeUdpListener(UdpListeningPort);
-            InitializeUdpSender(TargetIpAddress, UdpTargetPort);
+
+            // Start receive queue worker
+            ThreadPool.QueueUserWorkItem(
+                new WaitCallback(ProcessReceiveQueue), null);
+
+            // Start send queue worker
+            ThreadPool.QueueUserWorkItem(
+                new WaitCallback(ProcessSendQueue));
+
         }
 
         public override void Dispose()
         {
             mIsActive = false;
-            mUdpClient.Close();
+
             mReceiveSignal.Set();
             mSendSignal.Set();
+
+            mMavLink.Dispose();
         }
 
         private void InitializeMavLink()
@@ -66,73 +72,32 @@ namespace MavLinkNet
             mMavLink.PacketReceived += HandlePacketReceived;
         }
 
-        private void InitializeUdpListener(int port)
-        {
-            // Create UDP listening socket on port
-            IPEndPoint ep = new IPEndPoint(IPAddress.Any, port);
-            mUdpClient = new UdpClient(ep);
-
-            mUdpClient.BeginReceive(
-                new AsyncCallback(ReceiveCallback), ep);
-
-            ThreadPool.QueueUserWorkItem(
-                new WaitCallback(ProcessReceiveQueue), null);
-        }
-
-        private void InitializeUdpSender(IPAddress targetIp, int targetPort)
-        {
-            ThreadPool.QueueUserWorkItem(
-               new WaitCallback(ProcessSendQueue), new IPEndPoint(targetIp, targetPort));
-        }
-
-
         // __ Receive _________________________________________________________
-
-
-        private void ReceiveCallback(IAsyncResult ar)
+        
+        
+        public override void DataReceived(object sender, byte[] data)
         {
-            try
-            {
-                IPEndPoint ep = ar.AsyncState as IPEndPoint;
-                mReceiveQueue.Enqueue(mUdpClient.EndReceive(ar, ref ep));
+            mReceiveQueue.Enqueue(data);
 
-                if (!mIsActive)
-                {
-                    mReceiveSignal.Set();
-                    return;
-                }
-
-                mUdpClient.BeginReceive(new AsyncCallback(ReceiveCallback), ar);
-
-                // Signal processReceive thread
-                mReceiveSignal.Set();
-            }
-            catch (SocketException)
-            {
-                mIsActive = false;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.Print(ex.Message);
-            }
+            // Signal processReceive thread
+            mReceiveSignal.Set();
         }
 
         private void ProcessReceiveQueue(object state)
         {
+            Thread.CurrentThread.Name = "ProcessReceiveQueue";
+
             while (true)
             {
                 byte[] buffer;
 
+                mReceiveSignal.WaitOne();
+
+                if (!mIsActive) break;
+
                 if (mReceiveQueue.TryDequeue(out buffer))
                 {
                     mMavLink.ProcessReceivedBytes(buffer, 0, buffer.Length);
-                }
-                else
-                {
-                    // Empty queue, sleep until signalled
-                    mReceiveSignal.WaitOne();
-
-                    if (!mIsActive) break;
                 }
             }
 
@@ -145,13 +110,15 @@ namespace MavLinkNet
 
         private void ProcessSendQueue(object state)
         {
+            Thread.CurrentThread.Name = "ProcessSendQueue";
+
             while (true)
             {
                 UasMessage msg;
 
                 if (mSendQueue.TryDequeue(out msg))
                 {
-                    SendMavlinkMessage(state as IPEndPoint, msg);
+                    SendMavlinkMessage(msg);
                 }
                 else
                 {
@@ -163,11 +130,10 @@ namespace MavLinkNet
             }
         }
 
-        private void SendMavlinkMessage(IPEndPoint ep, UasMessage msg)
+        private void SendMavlinkMessage(UasMessage msg)
         {
-            byte[] buffer = mMavLink.SerializeMessage(msg, MavlinkSystemId, MavlinkComponentId, true);
-            
-            mUdpClient.Send(buffer, buffer.Length, ep);
+            var serialized = mMavLink.SerializeMessage(msg, MavlinkSystemId, MavlinkComponentId, true);
+            HandleDataToSend(this, serialized);
         }
 
 
@@ -203,5 +169,6 @@ namespace MavLinkNet
             // Signal send thread
             mSendSignal.Set();
         }
+
     }
 }

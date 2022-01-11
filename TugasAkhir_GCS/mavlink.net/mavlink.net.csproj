@@ -41,9 +41,7 @@
     <Compile Include="MavLinkPacketBase.cs" />
     <Compile Include="MavLinkPacketV20.cs" />
     <Compile Include="MavLinkPacketV10.cs" />
-    <Compile Include="MavLinkSerialPortTransport.cs" />
-    <Compile Include="MavLinkTCPClientTransport.cs" />
-    <Compile Include="MavLinkUdpTransport.cs" />
+    <Compile Include="MavLinkDefaultTransport.cs" />
     <Compile Include="MavLinkAsyncWalker.cs" />
     <Compile Include="GeneratedMessages.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

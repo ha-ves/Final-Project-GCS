@@ -50,13 +50,18 @@ namespace System.IO
             mBuffer = new byte[bufferCapacity];
         }
 
+        public override void Close()
+        {
+            base.Close();
+        }
+
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
-
             AbortRead();
 
             mBlockSignal.Dispose();
+
+            base.Dispose(disposing);
         }
 
         public override bool CanRead
@@ -168,7 +173,14 @@ namespace System.IO
         public void AbortRead()
         {
             mReadIsAborted = true;
-            mBlockSignal.Set();
+            try
+            {
+                mBlockSignal.Set();
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
         }
 
         public override int ReadByte()

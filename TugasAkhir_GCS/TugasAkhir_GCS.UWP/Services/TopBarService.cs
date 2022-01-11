@@ -12,6 +12,8 @@ using Windows.UI.Xaml;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.UWP;
 
+using MainApp = TugasAkhir_GCS.App;
+
 [assembly: Dependency(typeof(TopBarService))]
 namespace TugasAkhir_GCS.UWP.Services
 {

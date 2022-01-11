@@ -3,93 +3,41 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TugasAkhir_GCS.MainPage"
              xmlns:local="clr-namespace:TugasAkhir_GCS"
-             xmlns:Maps="clr-namespace:Xamarin.Forms.GoogleMaps;assembly=Xamarin.Forms.GoogleMaps">
-    <ContentPage.Resources>
-        <ColumnDefinitionCollection x:Key="Cols">
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="35"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="2*"/>
-        </ColumnDefinitionCollection>
-        <OnPlatform x:Key="Columns" x:TypeArguments="ColumnDefinitionCollection">
-            <On Platform="UWP">
-                <ColumnDefinitionCollection>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="120"/>
-                </ColumnDefinitionCollection>
-            </On>
-            <On Platform="Android">
-                <ColumnDefinitionCollection>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
-                </ColumnDefinitionCollection>
-            </On>
-        </OnPlatform>
-        
-        <OnPlatform x:Key="IMU_Dial" x:TypeArguments="x:Double">
-            <On Platform="UWP" Value="250"/>
-            <On Platform="Android" Value="150"/>
-        </OnPlatform>
-        <OnPlatform x:Key="AUX_Dial" x:TypeArguments="x:Double">
-            <On Platform="UWP" Value="125"/>
-            <On Platform="Android" Value="75"/>
-        </OnPlatform>
-        <OnPlatform x:Key="TopBar_Margin" x:TypeArguments="Thickness">
-            <On Platform="UWP" Value="0,-32,0,0"/>
-            <On Platform="Android" Value="0,-32,0,0"/>
-        </OnPlatform>
-    </ContentPage.Resources>
+             xmlns:avionics="clr-namespace:TugasAkhir_GCS.CustomView">
     
     <Grid x:Name="MainAppGrid">
         <StackLayout>
             <Frame BackgroundColor="#FFFFFF" CornerRadius="16" Margin="{StaticResource Key=TopBar_Margin}" Padding="0,4" VerticalOptions="Start">
                 <Frame BackgroundColor="#00879D" CornerRadius="16" Padding="0" Margin="0">
-                    <Grid Margin="0,28,0,0" Padding="2" ColumnDefinitions="{StaticResource Key=Columns}">
+                    <Grid Margin="0,28,0,0" Padding="2" ColumnDefinitions="*,3*,30,3*,2*,2*,2*">
                         <Label Grid.Column="0" Text="TA GCS" TextColor="White" FontFamily="Bebas" FontSize="Title" CharacterSpacing="1" HorizontalTextAlignment="Center" HorizontalOptions="Center" VerticalOptions="Center"/>
                         <Frame Grid.Column="3" BackgroundColor="Transparent" BorderColor="White" Padding="0" HorizontalOptions="FillAndExpand">
-                            <Label Text="flight mode" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Label Text="{Binding FlightMode}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="Center" VerticalOptions="Center"/>
                         </Frame>
-                        <Label Grid.Column="4" Text="t+00:00:00" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
-                        <Label Grid.Column="5" Text="rssi 100%" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
-                        <Label Grid.Column="6" Text="batt 100%" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                        <Label Grid.Column="4" Text="{Binding FlightTime}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                        <Label Grid.Column="5" Text="{Binding SignalPercent}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                        <Label Grid.Column="6" Text="{Binding BattPercent}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
 
-                        <Frame x:Name="TitleBar" Grid.Column="0" Grid.ColumnSpan="7"  BackgroundColor="Transparent" Padding="0" Margin="-4" CornerRadius="0"/>
-
-                        <Button Grid.Column="1" BackgroundColor="Red" Text="disconnected" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" Clicked="Connection_Clicked" CornerRadius="4"/>
-                        <ImageButton Grid.Column="2" Clicked="Toggle_ConnSettings" BackgroundColor="DarkSlateBlue" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.settings.png}" Aspect="AspectFill" CornerRadius="4" Padding="2"/>
+                        <Button x:Name="ConnectBtn" Grid.Column="1" BackgroundColor="DarkSlateGray" Text="disconnected" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" Clicked="Connection_Clicked" CornerRadius="4" IsEnabled="False"/>
+                        <ImageButton x:Name="ConnSettingBtn" Grid.Column="2" Clicked="Toggle_ConnSettings" BackgroundColor="DarkSlateBlue" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.settings.png}" Aspect="AspectFit" CornerRadius="4" Padding="2" HeightRequest="30"/>
                     </Grid>
                 </Frame>
             </Frame>
             
-            <Grid VerticalOptions="FillAndExpand" HorizontalOptions="CenterAndExpand" Margin="0" Padding="0,-5,0,0">
-                <Maps:Map x:Name="Map" InitialCameraUpdate="-2.46625,117.996111,5.25" MapType="Satellite"/>
-            
+            <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Margin="0" Padding="0,-5,0,0">
+                <local:MapView x:Name="MapView"/>
                 <StackLayout Padding="5" Orientation="Vertical" VerticalOptions="End" HorizontalOptions="Center">
-                    <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
-                        <Frame Padding="5" BorderColor="White" BackgroundColor="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}">
-                            <Label Text="KESTABILAN" HorizontalTextAlignment="Center" HorizontalOptions="CenterAndExpand"/>
+                    <StackLayout Orientation="Vertical" HorizontalOptions="Center">
+                        <Frame x:Name="Kestabilan" Padding="5" IsVisible="False" BorderColor="White" BackgroundColor="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}">
+                            <Label Text="KESTABILAN" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
                         </Frame>
-                        <Frame Padding="5" BorderColor="White" BackgroundColor="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}">
-                            <Label Text="WAKTU KEMBALI" HorizontalTextAlignment="Center" HorizontalOptions="CenterAndExpand"/>
+                        <Frame x:Name="WaktuKembali" Padding="5" IsVisible="False" BorderColor="White" BackgroundColor="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}">
+                            <Label Text="WAKTU KEMBALI" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
                         </Frame>
                     </StackLayout>
-                    <Frame HorizontalOptions="Center" Padding="5" BorderColor="LightSlateGray" BackgroundColor="White">
+                    <Frame HorizontalOptions="Center" Padding="5" BackgroundColor="White">
                         <StackLayout Orientation="Horizontal">
-                            <Ellipse Fill="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}" HeightRequest="{StaticResource Key=IMU_Dial}" Aspect="Uniform" VerticalOptions="Center"/>
+                            <avionics:AttitudeAvionic x:Name="IMU_Avionic" WidthRequest="{StaticResource Key=IMU_Dial}" HeightRequest="{StaticResource Key=IMU_Dial}" VerticalOptions="Center"/>
                             <StackLayout Orientation="Vertical" VerticalOptions="Center">
                                 <Ellipse Fill="DimGray" Aspect="Uniform" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>
                                 <Ellipse Fill="DimGray" Aspect="Uniform" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>
@@ -97,9 +45,26 @@
                         </StackLayout>
                     </Frame>
                 </StackLayout>
+
+                <Button Text="Test AES" TextColor="Black" BackgroundColor="Yellow" Clicked="Button_Clicked" VerticalOptions="Start" HorizontalOptions="Start" IsVisible="False" IsEnabled="False"/>
+                <Button Text="60s Flight Data Dump" TextColor="Black" BackgroundColor="Pink" Clicked="Button_Clicked_1" VerticalOptions="Start" HorizontalOptions="Start" IsVisible="False" IsEnabled="False"/>
+                <Button Text="Dummy update" TextColor="Black" BackgroundColor="CornflowerBlue" Clicked="Button_Clicked_2" VerticalOptions="Start" HorizontalOptions="Start" IsEnabled="False" IsVisible="False"/>
+
+                <Grid BackgroundColor="#5AFFFFFF">
+                    <local:ConnectionSettings x:Name="ConnSettings" Confirmed="ConnSettings_Confirmed" VerticalOptions="Center" HorizontalOptions="Center"/>
+                </Grid>
             </Grid>
         </StackLayout>
-
-        <local:ConnectionSettings x:Name="ConnSettings" Confirmed="ConnSettings_Confirmed" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand"/>
+        
+        <Grid x:Name="LoadingOverlay" BackgroundColor="#5AFFFFFF">
+            <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Center">
+                <Frame BackgroundColor="#DA000000">
+                    <StackLayout Orientation="Vertical">
+                        <ActivityIndicator x:Name="LoadingAct" Color="White" IsRunning="True" Margin="10" HorizontalOptions="Center"/>
+                        <Label x:Name="LoadingMessage" Text="Loading..." TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center"/>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+        </Grid>
     </Grid>
 </ContentPage>
