@@ -30,11 +30,6 @@ namespace TugasAkhir_GCS
         {
             InitializeComponent();
 
-            PrepareMapAsync();
-        }
-
-        private Task PrepareMapAsync()
-        {
             mapView.MyLocationLayer.Enabled = false;
             mapView.RotationLock = false;
 
@@ -67,8 +62,6 @@ namespace TugasAkhir_GCS
                 SphericalMercator.FromLonLat(lat: -11.00750, lon: 94.97278),
                 SphericalMercator.FromLonLat(lat: 6.07500, lon: 141.01944)
             ), ScaleMethod.Fit);
-
-            return Task.FromResult(true);
         }
 
         public void UpdateGPS(int lat, int lon)

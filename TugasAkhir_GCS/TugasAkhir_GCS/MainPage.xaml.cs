@@ -40,9 +40,11 @@ namespace TugasAkhir_GCS
         public string FlightTime { get => _flightTime; }
 
         System.Timers.Timer FlightTimer;
+        Stopwatch FlightStopwatch;
 
         /* Kestabilan terbang variables */
         List<double> LastSamples = new List<double>();
+        List<double> LastSamplesTime = new List<double>();
         const int samples = 10;
 
         /* Other variables */
@@ -98,7 +100,7 @@ namespace TugasAkhir_GCS
                     UpdateKestabilanTerbang();
                     break;
                 case UasHeartbeat HrtBt:
-                    Debug.WriteLine($"New {msg}");
+                    //Debug.WriteLine($"New {msg}");
                     UpdateFlightMode(HrtBt.SystemStatus);
                     break;
                 default:
@@ -115,9 +117,14 @@ namespace TugasAkhir_GCS
         private void UpdateAtt(float yawRad, float pitchRad, float rollRad)
         {
             LastSamples.Add(rollRad * 180.0 / Math.PI);
+            if(FlightStopwatch != null)
+                LastSamplesTime.Add(FlightStopwatch.Elapsed.TotalMilliseconds);
 
             if (LastSamples.Count > samples)
+            {
                 LastSamples.RemoveAt(0);
+                //LastSamplesTime.RemoveAt(0);
+            }
 
             IMU_Avionic.UpdateUI(pitchRad, rollRad);
 
@@ -155,22 +162,41 @@ namespace TugasAkhir_GCS
                     Kestabilan.IsVisible = true;
                     Kestabilan.BackgroundColor = Color.Red;
                     (Kestabilan.Content as Label).Text = "Sangat miring";
+                    if (grad < 0)
+                        (Kestabilan.Content as Label).Text += " Ke Kiri";
+                    else
+                        (Kestabilan.Content as Label).Text += " Ke Kanan";
                     (Kestabilan.Content as Label).TextColor = Color.White;
+
+                    //Debug.WriteLine((Kestabilan.Content as Label).Text);
+                    //Debug.WriteLine("Last samples :");
+                    //for (int i = 0; i < samples; i++)
+                    //{
+                    //    Debug.WriteLine($"{LastSamplesTime[i]} | {LastSamples[i]} ");
+                    //}
+                    //Debug.WriteLine("");
                 }
                 else if (5 < m && m < 10)
                 {
                     Kestabilan.IsVisible = true;
                     Kestabilan.BackgroundColor = Color.Yellow;
                     (Kestabilan.Content as Label).Text = "Miring";
+                    if (grad < 0)
+                        (Kestabilan.Content as Label).Text += " Ke Kiri";
+                    else
+                        (Kestabilan.Content as Label).Text += " Ke Kanan";
                     (Kestabilan.Content as Label).TextColor = Color.Black;
+
+                    //Debug.WriteLine((Kestabilan.Content as Label).Text);
+                    //Debug.WriteLine("Last samples :");
+                    //for (int i = 0; i < samples; i++)
+                    //{
+                    //    Debug.WriteLine($"{LastSamplesTime[i]} | {LastSamples[i]} ");
+                    //}
+                    //Debug.WriteLine("");
                 }
                 else
                     Kestabilan.IsVisible = false;
-
-                if (grad < 0)
-                    (Kestabilan.Content as Label).Text += " Ke Kiri";
-                else
-                    (Kestabilan.Content as Label).Text += " Ke Kanan";
             });
         }
 
@@ -359,11 +385,12 @@ namespace TugasAkhir_GCS
 
         private void StartFlightTimer()
         {
-            var StartTime = DateTime.Now;
-            FlightTimer = new System.Timers.Timer(50);
+            FlightStopwatch = Stopwatch.StartNew();
+
+            FlightTimer = new System.Timers.Timer(100);
             FlightTimer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) =>
             {
-                _flightTime = "t+" + (DateTime.Now - StartTime).ToString("hh\\:mm\\:ss\\.ff");
+                _flightTime = "t+" + FlightStopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.ff");
                 OnPropertyChanged("FlightTime");
             };
             FlightTimer.Start();
@@ -371,6 +398,9 @@ namespace TugasAkhir_GCS
 
         private void StopFlightTimer()
         {
+            if (FlightStopwatch.IsRunning)
+                FlightStopwatch.Stop();
+
             if(FlightTimer != null)
             {
                 FlightTimer.Stop();
@@ -381,30 +411,13 @@ namespace TugasAkhir_GCS
 
         #endregion
 
-        #region unused
+        #region Demo
 
-        private async void PrepareMap()
-        {
-            Debug.WriteLine("Preparing map");
+        #region Demo AES
 
-            var perm = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
 
-            if (perm != PermissionStatus.Granted)
-            {
-                Debug.WriteLine("USER SHOULD ALLOW MANUALLY");
 
-                if (await DisplayAlert("Function not allowed",
-                    $"This function requires Location Permission and we detected that you manually denied access." +
-                    $"Please go to your device's setting and allow the permission for this App.", "Go To Setting", "Deny"))
-                    DependencyService.Get<IPermissionRequestService>().RequestManualPermission(new Permissions.LocationWhenInUse());
-            }
-            else
-            {
-                await DisplayAlert("Location access granted", "Thank your for allowing Location access", "Continue");
-                //Map.UiSettings.MyLocationButtonEnabled = true;
-                //Map.MyLocationEnabled = true;
-            }
-        }
+        #endregion
 
         #endregion
 
@@ -552,20 +565,22 @@ namespace TugasAkhir_GCS
 
         #region Dummy Update UI
 
-        System.Timers.Timer test = new System.Timers.Timer(100);
+        System.Timers.Timer test = new System.Timers.Timer(1000);
         bool Stopped = true;
 
-        private void Button_Clicked_2(object sender, EventArgs e)
+        private void DemoVisualisasi(object sender, EventArgs e)
         {
             if (Stopped)
             {
                 test.Start();
                 Stopped = false;
+                useCompass = false;
             }
             else
             {
                 test.Stop();
                 Stopped = true;
+                useCompass = true;
             }
         }
 
@@ -574,16 +589,24 @@ namespace TugasAkhir_GCS
             Dispatcher.BeginInvokeOnMainThread(() =>
             {
                 var y = new Random().Next(-180, 180);
-                var p = new Random().Next(-90, 90);
-                var r = new Random().Next(-180, 180);
+                var p = new Random().Next(-20, 20);
+                var r = new Random().Next(-20, 20);
 
-                var lat = -74107080 + new Random().Next(-50, 50);
-                var lon = 1127047190 + new Random().Next(-50, 50);
+                var lat = -74107080 + new Random().Next(-1000, 1000);
+                var lon = 1127047190 + new Random().Next(-1000, 1000);
 
                 var batt = (sbyte)(80 + new Random().Next(-3, 3));
 
+                DemoLabel.Text = "Demo Visualisasi :\r\n" +
+                                $"Yaw : {y}\r\n" +
+                                $"Pitch : {p}\r\n" +
+                                $"Roll : {r} \r\n\n" +
+                                $"Latitude : {lat/10000000.0}\r\n" +
+                                $"Longitude : {lon/10000000.0} \r\n\n" +
+                                $"Kapasitas Baterai : {batt} \r\n\n";
+
                 UpdateAtt((float)(y * Math.PI / 180.0), (float)(p * Math.PI / 180.0), (float)(r * Math.PI / 180.0));
-                UpdateKestabilanTerbang();
+                //UpdateKestabilanTerbang();
 
                 UpdateGPS(lat, lon);
 

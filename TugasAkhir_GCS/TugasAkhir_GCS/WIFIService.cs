@@ -30,7 +30,8 @@ namespace TugasAkhir_GCS
             var endpoint = new IPEndPoint(ip, port);
 
             //use UDP
-            NetSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            //NetSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            NetSocket = new UdpClient(64625).Client;
 
             await Task.WhenAny(Task.Delay(5000), Task.Run(() =>
             {
@@ -101,11 +102,11 @@ namespace TugasAkhir_GCS
             
             NetSocket.BeginReceive(RxBuf, 0, RxBuf.Length, SocketFlags.None, WIFIReceived, null);
 
-            //Debug.WriteLine($"New WIFI Data -> {bytes}");
+            //Debug.WriteLine($"New WIFI Data (encrypted) -> {bytes}");
             //int count = 0;
-            //for (int i = 0; i < e.BytesTransferred; i++)
+            //for (int i = 0; i < bytes; i++)
             //{
-            //    Debug.Write($" {e.Buffer[i]:X2} ");
+            //    Debug.Write($" {RxBuf[i]:X2} ");
             //    if (++count > 15)
             //    {
             //        Debug.WriteLine("");

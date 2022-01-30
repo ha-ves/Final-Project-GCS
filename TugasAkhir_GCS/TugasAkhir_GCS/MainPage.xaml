@@ -46,10 +46,13 @@
                     </Frame>
                 </StackLayout>
 
-                <Button Text="Test AES" TextColor="Black" BackgroundColor="Yellow" Clicked="Button_Clicked" VerticalOptions="Start" HorizontalOptions="Start" IsVisible="False" IsEnabled="False"/>
-                <Button Text="60s Flight Data Dump" TextColor="Black" BackgroundColor="Pink" Clicked="Button_Clicked_1" VerticalOptions="Start" HorizontalOptions="Start" IsVisible="False" IsEnabled="False"/>
-                <Button Text="Dummy update" TextColor="Black" BackgroundColor="CornflowerBlue" Clicked="Button_Clicked_2" VerticalOptions="Start" HorizontalOptions="Start" IsEnabled="False" IsVisible="False"/>
-
+                <StackLayout VerticalOptions="Start" HorizontalOptions="Start">
+                    <Button Text="Demo Visualisasi" TextColor="Black" BackgroundColor="CornflowerBlue" Clicked="DemoVisualisasi" VerticalOptions="Start" HorizontalOptions="Start"/>
+                    <!--<Button Text="Demo AES" TextColor="Black" BackgroundColor="Yellow" Clicked="DemoAES" VerticalOptions="Start" HorizontalOptions="Start"/>
+                    <Button Text="Demo AES" TextColor="Black" BackgroundColor="Yellow" Clicked="DemoAES" VerticalOptions="Start" HorizontalOptions="Start"/>-->
+                    <Label Text="DEMO LABEL" x:Name="DemoLabel" FontSize="Medium" BackgroundColor="#AA101010"></Label>
+                </StackLayout>
+                <!--<Button Text="60s Flight Data Dump" TextColor="Black" BackgroundColor="Pink" Clicked="Button_Clicked_1" VerticalOptions="Start" HorizontalOptions="Start" IsVisible="False" IsEnabled="False"/>-->
                 <Grid BackgroundColor="#5AFFFFFF">
                     <local:ConnectionSettings x:Name="ConnSettings" Confirmed="ConnSettings_Confirmed" VerticalOptions="Center" HorizontalOptions="Center"/>
                 </Grid>

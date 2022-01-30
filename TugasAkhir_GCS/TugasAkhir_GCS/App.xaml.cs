@@ -42,6 +42,8 @@ namespace TugasAkhir_GCS
             MainPage = new MainPage();
 
             (MainPage as MainPage).HideLoadingOverlay();
+
+
         }
 
         #region Transport
@@ -83,6 +85,19 @@ namespace TugasAkhir_GCS
                 var plain = (App.Current as App).DecryptAndGetPlainBytes(data);
 
                 MavLinkTransport.DataReceived(sender, plain);
+
+                Debug.WriteLine($"New Data (decrypted) -> {plain.Length} [");
+                int count = 0;
+                for (int i = 0; i < plain.Length; i++)
+                {
+                    Debug.Write($" {plain[i]:X2} ");
+                    if (++count > 15)
+                    {
+                        Debug.WriteLine("");
+                        count = 0;
+                    }
+                }
+                Debug.WriteLine("]");
             }
             catch (CryptographicException cryptExc)
             {
@@ -143,7 +158,7 @@ namespace TugasAkhir_GCS
 
         private void MavLinkReceived(object sender, MavLinkPacketBase packet)
         {
-            //Debug.WriteLine($"New {packet.Message} received.");
+            Debug.WriteLine($"New {packet.Message} received.");
 
             totalPackets++;
             if(lastSeqNum + 1 < packet.PacketSequenceNumber)

@@ -127,18 +127,18 @@ namespace TugasAkhir_GCS.UWP.Services
 
                 if (RxBuf.Length > 0)
                 {
-                    //Debug.WriteLine($"SerialReader received -> {RxBuf.Length}[");
-                    //int count = 0;
-                    //foreach (var hex in RxBuf.ToArray())
-                    //{
-                    //    Debug.Write($" {hex:X2} ");
-                    //    if (++count > 15)
-                    //    {
-                    //        Debug.WriteLine("");
-                    //        count = 0;
-                    //    }
-                    //}
-                    //Debug.WriteLine("]");
+                    Debug.WriteLine($"SerialReader received -> {RxBuf.Length}[");
+                    int count = 0;
+                    foreach (var hex in RxBuf.ToArray())
+                    {
+                        Debug.Write($" {hex:X2} ");
+                        if (++count > 15)
+                        {
+                            Debug.WriteLine("");
+                            count = 0;
+                        }
+                    }
+                    Debug.WriteLine("]");
 
                     if (DataReceived != null) DataReceived(this, RxBuf.ToArray());
                 }
