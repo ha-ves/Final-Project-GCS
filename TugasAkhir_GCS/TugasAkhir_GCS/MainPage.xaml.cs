@@ -83,45 +83,54 @@ namespace TugasAkhir_GCS
 
         #region Update UI
 
-        public void UpdateUI(UasMessage msg, DateTime lastprocess)
+        public void UpdateUI(UasMessage msg, TimeSpan msgprocess, DateTime lastprocess)
         {
             //Debug.WriteLine($"New {msg}");
+
+            var updateui = DateTime.Now - lastprocess;
 
             switch (msg)
             {
                 case UasSysStatus SysStat:
                     UpdateBatt(SysStat.BatteryRemaining);
                     UpdateSignal(SysStat.DropRateComm);
+
+                    (App.Current as App).syssavefile.WriteLine(
+                        $"{(App.Current as App).decrypt.TotalMilliseconds}," +
+                        $"{msgprocess.TotalMilliseconds}," +
+                        $"{updateui.TotalMilliseconds}");
                     break;
                 case UasGlobalPositionInt Gps:
                     UpdateGPS(Gps.Lat, Gps.Lon);
                     UpdateBearing(Gps.Hdg);
+
+                    (App.Current as App).gpssavefile.WriteLine(
+                        $"{(App.Current as App).decrypt.TotalMilliseconds}," +
+                        $"{msgprocess.TotalMilliseconds}," +
+                        $"{updateui.TotalMilliseconds}");
                     break;
                 case UasAttitude Att:
                     UpdateAtt(Att.Yaw, Att.Pitch, Att.Roll);
                     UpdateKestabilanTerbang();
+
+                    (App.Current as App).attsavefile.WriteLine(
+                        $"{(App.Current as App).decrypt.TotalMilliseconds}," +
+                        $"{msgprocess.TotalMilliseconds}," +
+                        $"{updateui.TotalMilliseconds}");
                     break;
                 case UasHeartbeat HrtBt:
                     UpdateFlightMode(HrtBt.SystemStatus);
+
+                    (App.Current as App).hrtsavefile.WriteLine(
+                        $"{(App.Current as App).decrypt.TotalMilliseconds}," +
+                        $"{msgprocess.TotalMilliseconds}," +
+                        $"{updateui.TotalMilliseconds}");
                     break;
                 default:
                     return;
             }
 
-            (App.Current as App).updateui = DateTime.Now - lastprocess;
-
-            Debug.WriteLine("");
-            Debug.WriteLine($"UI updated in {(App.Current as App).updateui.TotalMilliseconds} ms since message processed");
-
-            (App.Current as App).writing.WriteLine(
-                $"{(App.Current as App).seq++}," +
-                $"{(App.Current as App).decrypt.TotalMilliseconds}," +
-                $"{(App.Current as App).msgprocess.TotalMilliseconds}," +
-                $"{(App.Current as App).updateui.TotalMilliseconds}");
-
-            MainThread.InvokeOnMainThreadAsync(() => DemoLabel.Text = $"sequence {(App.Current as App).seq}\r\n" +
-            $"ciphertext decrypted in {(App.Current as App).decrypt.TotalMilliseconds} ms\r\n" +
-            $"ui updated in {(App.Current as App).updateui.TotalMilliseconds} ms");
+            Debug.WriteLine($"UI {msg} updated in {updateui.TotalMilliseconds} ms");
         }
 
         private void UpdateFlightMode(MavState state)
@@ -372,7 +381,10 @@ namespace TugasAkhir_GCS
 
                 ShowLoadingOverlay("Memutuskan koneksi UAV . . .");
 
-                (App.Current as App).writing.Finish();
+                (App.Current as App).attsavefile.Finish();
+                (App.Current as App).gpssavefile.Finish();
+                (App.Current as App).syssavefile.Finish();
+                (App.Current as App).hrtsavefile.Finish();
 
                 if (!await (App.Current as App).ReceiverService.Disconnect())
                     return;
@@ -405,7 +417,7 @@ namespace TugasAkhir_GCS
         {
             FlightStopwatch = Stopwatch.StartNew();
 
-            FlightTimer = new System.Timers.Timer(100);
+            FlightTimer = new System.Timers.Timer(1 / 60.0);
             FlightTimer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) =>
             {
                 _flightTime = "t+" + FlightStopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.ff");

@@ -87,11 +87,13 @@ namespace TugasAkhir_GCS
                 return;
             }
 
+            //Wahana.Position = new Position(lat / 10000000.0, lon / 10000000.0);
+
             var asal_pos = Wahana.Position;
             var temp_pos = new Position(lat / 10000000.0, lon / 10000000.0);
 
             AnimationExtensions.Animate<Position>(self: this, name: "PositionAnim", rate: 5, length: 30,
-            transform: (time) => 
+            transform: (time) =>
             {
                 var lat_interpolated = asal_pos.Latitude
                                     + ((temp_pos.Latitude - asal_pos.Latitude)
@@ -120,6 +122,8 @@ namespace TugasAkhir_GCS
             var hdg = bearing;
             if (bearing < Wahana.Rotation - 180)
                 hdg += 360;
+
+            //Wahana.Rotation = bearing;
 
             new Xamarin.Forms.Animation(start: Wahana.Rotation, end: hdg,
             callback: val => Wahana.Rotation = (float)val,

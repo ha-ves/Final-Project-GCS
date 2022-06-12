@@ -37,11 +37,20 @@ namespace TugasAkhir_GCS.UWP.Services
 
         public async void Finish()
         {
-            await savefile.StoreAsync();
-            await filestream.FlushAsync();
+            if(savefile != null)
+                await savefile.StoreAsync();
+            if (filestream != null)
+                await filestream.FlushAsync();
 
-            savefile.Dispose();
-            filestream.Dispose();
+            if (savefile != null)
+                savefile.Dispose();
+            if (filestream != null)
+                filestream.Dispose();
+
+            savefile = null;
+            filestream = null;
+
+            Debug.WriteLine("Save File Finished");
         }
 
     }
