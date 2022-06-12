@@ -112,7 +112,7 @@ namespace TugasAkhir_GCS
             return typeof(App).Assembly.GetManifestResourceStream(path).ToBytes();
         }
 
-        internal void UpdateBearing(float bearing)
+        public void UpdateBearing(float bearing)
         {
             if (Wahana == null)
                 return;

@@ -49,7 +49,8 @@ namespace TugasAkhir_GCS
             BindingContext = this;
             InitializeComponent();
 
-            ((COM_Ports.Parent as StackLayout).Children[1] as Picker).SelectedIndex = 0;
+            BaudRates.SelectedIndex = 0;
+            IP_Proto.SelectedIndex = 0;
         }
 
         private async void Btn_USB_Clicked(object sender, EventArgs e)

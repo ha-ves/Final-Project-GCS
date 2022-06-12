@@ -54,7 +54,6 @@
   </Applications>
 
   <Capabilities>
-	<uap:Capability Name="documentsLibrary"/>
     <Capability Name="internetClient"/>
 	<DeviceCapability Name="serialcommunication">
 	    <Device Id="any">

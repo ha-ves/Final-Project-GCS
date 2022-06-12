@@ -102,20 +102,20 @@ namespace TugasAkhir_GCS
             
             NetSocket.BeginReceive(RxBuf, 0, RxBuf.Length, SocketFlags.None, WIFIReceived, null);
 
-            //Debug.WriteLine($"New WIFI Data (encrypted) -> {bytes}");
-            //int count = 0;
-            //for (int i = 0; i < bytes; i++)
-            //{
-            //    Debug.Write($" {RxBuf[i]:X2} ");
-            //    if (++count > 15)
-            //    {
-            //        Debug.WriteLine("");
-            //        count = 0;
-            //    }
-            //}
-            //Debug.WriteLine("");
+            Debug.WriteLine($"New WIFI Data (encrypted) -> {bytes} bytes");
+            int count = 0;
+            for (int i = 0; i < bytes; i++)
+            {
+                Debug.Write($" {RxBuf[i]:X2} ");
+                if (++count > 15)
+                {
+                    Debug.WriteLine("");
+                    count = 0;
+                }
+            }
+            Debug.WriteLine("");
 
-            if (DataReceived != null) DataReceived(this, RxBuf.Take(bytes).ToArray());
+            if (DataReceived != null) Task.Run(() => DataReceived(this, RxBuf.Take(bytes).ToArray()));
         }
 
         public void SendData(object sender, byte[] buffer) => NetSocket.Send(buffer);

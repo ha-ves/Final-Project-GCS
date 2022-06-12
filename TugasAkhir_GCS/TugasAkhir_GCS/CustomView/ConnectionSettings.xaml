@@ -24,10 +24,16 @@
                         <StackLayout Margin="0,0,0,10" Orientation="Horizontal" HorizontalOptions="Center">
                             <Entry x:Name="IP_Address" Placeholder="(ie. 127.0.0.1)" Text="{Binding IP}" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}"/>
                             <Entry Placeholder="(ie. 12727)" Text="{Binding Port}" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}"/>
+                            <Picker x:Name="IP_Proto" SelectedIndex="1">
+                                <Picker.Items>
+                                    <x:String>UDP</x:String>
+                                    <x:String>TCP</x:String>
+                                </Picker.Items>
+                            </Picker>
                         </StackLayout>
                         <StackLayout Margin="0,0,0,10" Orientation="Horizontal" HorizontalOptions="Center">
                             <Picker x:Name="COM_Ports" ItemsSource="{Binding COMS}" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}" SelectedItem="{Binding SelectedCOM}"/>
-                            <Picker HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}" SelectedItem="{Binding SelectedBaud}">
+                            <Picker x:Name="BaudRates" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}" SelectedItem="{Binding SelectedBaud}">
                                 <Picker.Items>
                                     <x:String>115200</x:String>
                                     <x:String>57600</x:String>

@@ -33,6 +33,13 @@ namespace TugasAkhir_GCS
         { 0xfd, 0x10, 0x00, 0x00, 0x3a, 0x00, 0xc8, 0x1e, 0x00, 0x00, 0xbd, 0x12, 0x01, 0x00, 0x83, 0xa1,
             0xe9, 0xbb, 0xb4, 0x2d, 0x4b, 0xbc, 0x37, 0xd0, 0xaa, 0x3f, 0x0e, 0xa6 };
 
+        /* stopwatch benchmark */
+        public int seq = 0;
+        public DateTime lastprocess;
+        public TimeSpan decrypt, msgprocess, updateui;
+
+        public IFileHandler writing;
+
         public App()
         {
             Thread.CurrentThread.Name = "MainApp Thread";
@@ -43,14 +50,20 @@ namespace TugasAkhir_GCS
 
             (MainPage as MainPage).HideLoadingOverlay();
 
+            var file = $"Attitude_ProcessTime_{DateTime.Now.ToString("yyyy-MM-dddd_ss-mm-HH")}.csv";
 
+            (App.Current as App).writing = DependencyService.Get<IFileHandler>();
+            (App.Current as App).writing.Initialize(file);
         }
 
         #region Transport
 
         public async Task<bool> InitializeTransport()
         {
-            if(MavLinkTransport != null)
+            writing.WriteLine("ATTITUDE (IMU SENSOR) PROCESSING DATA");
+            writing.WriteLine("Seq,Decrypt Time (ms),Parse time (ms),UI update time (ms)");
+
+            if (MavLinkTransport != null)
                 MavLinkTransport.Dispose();
 
             MavLinkTransport = new MavLinkDefaultTransport();
@@ -67,7 +80,7 @@ namespace TugasAkhir_GCS
         {
             try
             {
-                var cipher = (App.Current as App).EncryptAndGetCipherBytes(buffer);
+                var cipher = EncryptAndGetCipherBytes(buffer);
 
                 ReceiverService.SendData(sender, cipher);
             }
@@ -82,11 +95,21 @@ namespace TugasAkhir_GCS
         {
             try
             {
+                //decryption.Restart();
+                lastprocess = DateTime.Now;
+
                 var plain = (App.Current as App).DecryptAndGetPlainBytes(data);
+
+                //decryption.Stop();
+                //updateUI.Restart();
+
+                decrypt = DateTime.Now - lastprocess;
+
+                lastprocess = DateTime.Now;
 
                 MavLinkTransport.DataReceived(sender, plain);
 
-                Debug.WriteLine($"New Data (decrypted) -> {plain.Length} [");
+                Debug.WriteLine($"Plaintext (decrypted in {decrypt.TotalMilliseconds} ms) -> {plain.Length} bytes");
                 int count = 0;
                 for (int i = 0; i < plain.Length; i++)
                 {
@@ -97,7 +120,7 @@ namespace TugasAkhir_GCS
                         count = 0;
                     }
                 }
-                Debug.WriteLine("]");
+                Debug.WriteLine("");
             }
             catch (CryptographicException cryptExc)
             {
@@ -158,30 +181,38 @@ namespace TugasAkhir_GCS
 
         private void MavLinkReceived(object sender, MavLinkPacketBase packet)
         {
-            Debug.WriteLine($"New {packet.Message} received.");
-
-            totalPackets++;
-            if(lastSeqNum + 1 < packet.PacketSequenceNumber)
-                droppedPackets += packet.PacketSequenceNumber - lastSeqNum;
-            lastSeqNum = packet.PacketSequenceNumber;
-
-            switch (packet.Message)
+            Task.Run(() =>
             {
-                case UasCommandAck CmdACK:
-                    MavLinkCmdAck.Set();
-                    break;
-                case UasSysStatus SysStat:
-                    MavLinkCmdAck.Set();
-                    SysStat.DropRateComm = (ushort)(droppedPackets * 10000 / totalPackets );
-                    totalPackets = 0;
-                    droppedPackets = 0;
-                    (MainPage as MainPage).UpdateUI(packet.Message);
-                    break;
-                default:
-                    MavLinkCmdAck.Set();
-                    (MainPage as MainPage).UpdateUI(packet.Message);
-                    break;
-            }
+                msgprocess = DateTime.Now - lastprocess;
+
+                lastprocess = DateTime.Now;
+
+                Debug.WriteLine("");
+                Debug.WriteLine($"New {packet.Message} received. Processed in {msgprocess.TotalMilliseconds} ms since decryption.");
+
+                totalPackets++;
+                if (lastSeqNum + 1 < packet.PacketSequenceNumber)
+                    droppedPackets += packet.PacketSequenceNumber - lastSeqNum;
+                lastSeqNum = packet.PacketSequenceNumber;
+
+                switch (packet.Message)
+                {
+                    case UasCommandAck CmdACK:
+                        MavLinkCmdAck.Set();
+                        break;
+                    case UasSysStatus SysStat:
+                        MavLinkCmdAck.Set();
+                        SysStat.DropRateComm = (ushort)(droppedPackets * 10000 / totalPackets);
+                        totalPackets = 0;
+                        droppedPackets = 0;
+                        (MainPage as MainPage).UpdateUI(packet.Message, lastprocess);
+                        break;
+                    default:
+                        MavLinkCmdAck.Set();
+                        (MainPage as MainPage).UpdateUI(packet.Message, lastprocess);
+                        break;
+                }
+            });
         }
 
         private Task<bool> GetMavLinkStreams()

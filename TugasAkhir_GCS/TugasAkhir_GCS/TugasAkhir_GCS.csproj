@@ -12,7 +12,10 @@
 
   <ItemGroup>
     <None Remove="Resources\Fonts\BebasNeue-Regular.otf" />
+    <None Remove="Resources\Fonts\GOTHIC.TTF" />
     <None Remove="Resources\Fonts\GOTHICB.TTF" />
+    <None Remove="Resources\Fonts\GOTHICBI.TTF" />
+    <None Remove="Resources\Fonts\GOTHICI.TTF" />
     <None Remove="Resources\Images\follow_uav.png" />
     <None Remove="Resources\Images\follow_uav_active.png" />
     <None Remove="Resources\Images\follow_uav_inactive.png" />
@@ -28,7 +31,10 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\Fonts\BebasNeue-Regular.otf" />
+    <EmbeddedResource Include="Resources\Fonts\GOTHIC.TTF" />
     <EmbeddedResource Include="Resources\Fonts\GOTHICB.TTF" />
+    <EmbeddedResource Include="Resources\Fonts\GOTHICBI.TTF" />
+    <EmbeddedResource Include="Resources\Fonts\GOTHICI.TTF" />
     <EmbeddedResource Include="Resources\Images\follow_uav_active.png" />
     <EmbeddedResource Include="Resources\Images\follow_uav_inactive.png" />
     <EmbeddedResource Include="Resources\Images\Horizon_GroundSky.png" />

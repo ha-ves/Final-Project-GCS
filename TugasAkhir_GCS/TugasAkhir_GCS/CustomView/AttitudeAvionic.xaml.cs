@@ -35,23 +35,32 @@ namespace TugasAkhir_GCS.CustomView
             var transX = (float)(pitchRad / Math.PI * 180.0 / 90 * 360 * sin);
             var transY = (float)(pitchRad / Math.PI * 180.0 / 90 * 360 * cos);
 
-            new Animation(val =>
-            {
-                _rotate = (float)val;
-                OnPropertyChanged("Rotate");
-            }, Rotate, rotate).Commit(this, "RotateAnim", rate: 5, length: 30);
+            _rotate = rotate;
+            OnPropertyChanged("Rotate");
 
-            new Animation(val =>
-            {
-                _transX = (float)val;
-                OnPropertyChanged("TransX");
-            }, TransX, transX).Commit(this, "TransXAnim", rate: 5, length: 30);
+            _transX = transX;
+            OnPropertyChanged("TransX");
 
-            new Animation(val =>
-            {
-                _transY = (float)val;
-                OnPropertyChanged("TransY");
-            }, TransY, transY).Commit(this, "TransYAnim", rate: 5, length: 30);
+            _transY = transY;
+            OnPropertyChanged("TransY");
+
+            //new Animation(val =>
+            //{
+            //    _rotate = (float)val;
+            //    OnPropertyChanged("Rotate");
+            //}, Rotate, rotate).Commit(this, "RotateAnim", rate: 5, length: 30);
+
+            //new Animation(val =>
+            //{
+            //    _transX = (float)val;
+            //    OnPropertyChanged("TransX");
+            //}, TransX, transX).Commit(this, "TransXAnim", rate: 5, length: 30);
+
+            //new Animation(val =>
+            //{
+            //    _transY = (float)val;
+            //    OnPropertyChanged("TransY");
+            //}, TransY, transY).Commit(this, "TransYAnim", rate: 5, length: 30);
         }
     }
 }

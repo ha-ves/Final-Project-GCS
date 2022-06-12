@@ -83,8 +83,10 @@ namespace TugasAkhir_GCS
 
         #region Update UI
 
-        public void UpdateUI(UasMessage msg)
+        public void UpdateUI(UasMessage msg, DateTime lastprocess)
         {
+            //Debug.WriteLine($"New {msg}");
+
             switch (msg)
             {
                 case UasSysStatus SysStat:
@@ -100,12 +102,26 @@ namespace TugasAkhir_GCS
                     UpdateKestabilanTerbang();
                     break;
                 case UasHeartbeat HrtBt:
-                    //Debug.WriteLine($"New {msg}");
                     UpdateFlightMode(HrtBt.SystemStatus);
                     break;
                 default:
-                    break;
+                    return;
             }
+
+            (App.Current as App).updateui = DateTime.Now - lastprocess;
+
+            Debug.WriteLine("");
+            Debug.WriteLine($"UI updated in {(App.Current as App).updateui.TotalMilliseconds} ms since message processed");
+
+            (App.Current as App).writing.WriteLine(
+                $"{(App.Current as App).seq++}," +
+                $"{(App.Current as App).decrypt.TotalMilliseconds}," +
+                $"{(App.Current as App).msgprocess.TotalMilliseconds}," +
+                $"{(App.Current as App).updateui.TotalMilliseconds}");
+
+            MainThread.InvokeOnMainThreadAsync(() => DemoLabel.Text = $"sequence {(App.Current as App).seq}\r\n" +
+            $"ciphertext decrypted in {(App.Current as App).decrypt.TotalMilliseconds} ms\r\n" +
+            $"ui updated in {(App.Current as App).updateui.TotalMilliseconds} ms");
         }
 
         private void UpdateFlightMode(MavState state)
@@ -155,7 +171,7 @@ namespace TugasAkhir_GCS
             //Debug.WriteLine($"Kestabian : m = {grad}");
 
             var m = Math.Abs(grad);
-            Dispatcher.BeginInvokeOnMainThread(() =>
+            MainThread.InvokeOnMainThreadAsync(() =>
             {
                 if (m >= 10)
                 {
@@ -355,6 +371,8 @@ namespace TugasAkhir_GCS
                 (sender as Button).BackgroundColor = Color.DarkBlue;
 
                 ShowLoadingOverlay("Memutuskan koneksi UAV . . .");
+
+                (App.Current as App).writing.Finish();
 
                 if (!await (App.Current as App).ReceiverService.Disconnect())
                     return;
@@ -586,7 +604,7 @@ namespace TugasAkhir_GCS
 
         void Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            Dispatcher.BeginInvokeOnMainThread(() =>
+            MainThread.InvokeOnMainThreadAsync(() =>
             {
                 var y = new Random().Next(-180, 180);
                 var p = new Random().Next(-20, 20);
