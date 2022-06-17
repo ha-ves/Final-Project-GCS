@@ -8,11 +8,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>$(DefineConstants);DATA_FETCH</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE;DATA_FETCH</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>$(DefineConstants);DATA_FETCH</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE;DATA_FETCH</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,7 +23,6 @@
     <None Remove="Resources\Fonts\GOTHICI.TTF" />
     <None Remove="Resources\Images\Alti-needle.png" />
     <None Remove="Resources\Images\Altimeter.png" />
-    <None Remove="Resources\Images\bearing-wheel.png" />
     <None Remove="Resources\Images\follow_uav.png" />
     <None Remove="Resources\Images\follow_uav_active.png" />
     <None Remove="Resources\Images\follow_uav_inactive.png" />
@@ -46,7 +45,6 @@
     <EmbeddedResource Include="Resources\Fonts\GOTHICI.TTF" />
     <EmbeddedResource Include="Resources\Images\Altimeter.png" />
     <EmbeddedResource Include="Resources\Images\Alti-needle.png" />
-    <EmbeddedResource Include="Resources\Images\bearing-wheel.png" />
     <EmbeddedResource Include="Resources\Images\follow_uav_active.png" />
     <EmbeddedResource Include="Resources\Images\follow_uav_inactive.png" />
     <EmbeddedResource Include="Resources\Images\home-ico.png" />
@@ -84,9 +82,6 @@
 
   <ItemGroup>
     <EmbeddedResource Update="CustomView\AltimeterAvionic.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="CustomView\BearingAvionic.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="CustomView\ConnectionSettings.xaml">

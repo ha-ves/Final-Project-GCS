@@ -60,9 +60,9 @@ namespace TugasAkhir_GCS.Droid.Services
         {
             ConnectedPort = SerialPorts[portName];
             var listener = new SerialListener();
-            listener.DataReceived += (sender, data) =>
+            listener.DataReceived += (sender, data, time) =>
             {
-                if (DataReceived != null) DataReceived(this, data);
+                if (DataReceived != null) DataReceived(this, data, time);
             };
             new SerialInputOutputManager(ConnectedPort, listener).Start();
 

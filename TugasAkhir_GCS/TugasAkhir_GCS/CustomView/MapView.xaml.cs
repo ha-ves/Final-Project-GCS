@@ -24,7 +24,7 @@ namespace TugasAkhir_GCS
 {
     public partial class MapView : ContentView
     {
-        Pin Wahana;
+        Pin Wahana, Home;
 
         public MapView()
         {
@@ -84,11 +84,23 @@ namespace TugasAkhir_GCS
                     SphericalMercator.FromLonLat(Wahana.Position.Longitude, Wahana.Position.Latitude),
                     ZoomLevelExtensions.ToMapsuiResolution(18.5), 3000, Mapsui.Utilities.Easing.CubicInOut);
 
+                Home = new Pin(mapView)
+                {
+                    Label = "Home",
+                    Type = PinType.Icon,
+                    Icon = GetBytesFromResource("TugasAkhir_GCS.Resources.Images.home-ico.png"),
+                    Scale = 0.05f,
+                    RotateWithMap = false,
+                };
+                mapView.Pins.Add(Home);
+
+                Home.Position = new Position(lat / 10000000.0, lon / 10000000.0);
+
                 return;
             }
-
-            //Wahana.Position = new Position(lat / 10000000.0, lon / 10000000.0);
-
+#if DATA_FETCH
+            Wahana.Position = new Position(lat / 10000000.0, lon / 10000000.0);
+#else
             var asal_pos = Wahana.Position;
             var temp_pos = new Position(lat / 10000000.0, lon / 10000000.0);
 
@@ -107,6 +119,7 @@ namespace TugasAkhir_GCS
             },
             callback: (val) => Wahana.Position = val,
             finished: (endpos, finished) => Wahana.Position = endpos);
+#endif
         }
 
         internal byte[] GetBytesFromResource(string path)
@@ -122,13 +135,14 @@ namespace TugasAkhir_GCS
             var hdg = bearing;
             if (bearing < Wahana.Rotation - 180)
                 hdg += 360;
-
-            //Wahana.Rotation = bearing;
-
+#if DATA_FETCH
+            Wahana.Rotation = bearing;
+#else
             new Xamarin.Forms.Animation(start: Wahana.Rotation, end: hdg,
             callback: val => Wahana.Rotation = (float)val,
             finished: () => Wahana.Rotation = bearing
             ).Commit(this, "HeadingAnim", rate: 10, length: 30, easing: Xamarin.Forms.Easing.SinInOut);
+#endif
         }
     }
 }

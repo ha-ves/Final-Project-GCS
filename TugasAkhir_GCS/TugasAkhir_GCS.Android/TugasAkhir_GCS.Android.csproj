@@ -66,6 +66,7 @@
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\FileHandler.cs" />
     <Compile Include="Services\PermissionRequestService.cs" />
     <Compile Include="Services\SerialListener.cs" />
     <Compile Include="Services\SerialPortService.cs" />

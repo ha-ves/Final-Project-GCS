@@ -12,11 +12,11 @@
                     <Grid Margin="0,28,0,0" Padding="2" ColumnDefinitions="*,3*,30,3*,2*,2*,2*">
                         <Label Grid.Column="0" Text="TA GCS" TextColor="White" FontFamily="Bebas" FontSize="Title" CharacterSpacing="1" HorizontalTextAlignment="Center" HorizontalOptions="Center" VerticalOptions="Center"/>
                         <Frame Grid.Column="3" BackgroundColor="Transparent" BorderColor="White" Padding="0" HorizontalOptions="FillAndExpand">
-                            <Label Text="{Binding FlightMode}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Label x:Name="fmode" Text="{Binding FlightMode}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="Center" VerticalOptions="Center"/>
                         </Frame>
-                        <Label Grid.Column="4" Text="{Binding FlightTime}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
-                        <Label Grid.Column="5" Text="{Binding SignalPercent}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
-                        <Label Grid.Column="6" Text="{Binding BattPercent}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                        <Label x:Name="ftime" Grid.Column="4" Text="{Binding FlightTime}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                        <Label x:Name="sig" Grid.Column="5" Text="{Binding SignalPercent}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                        <Label x:Name="batt" Grid.Column="6" Text="{Binding BattPercent}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
 
                         <Button x:Name="ConnectBtn" Grid.Column="1" BackgroundColor="DarkSlateGray" Text="disconnected" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" Clicked="Connection_Clicked" CornerRadius="4" IsEnabled="False"/>
                         <ImageButton x:Name="ConnSettingBtn" Grid.Column="2" Clicked="Toggle_ConnSettings" BackgroundColor="DarkSlateBlue" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.settings.png}" Aspect="AspectFit" CornerRadius="4" Padding="2" HeightRequest="30"/>
@@ -26,7 +26,7 @@
             
             <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Margin="0" Padding="0,-5,0,0">
                 <local:MapView x:Name="MapView"/>
-                <StackLayout Padding="5" Orientation="Vertical" VerticalOptions="End" HorizontalOptions="Center">
+                <StackLayout Padding="5" Orientation="Vertical" VerticalOptions="End" HorizontalOptions="Center" IsVisible="true">
                     <StackLayout Orientation="Vertical" HorizontalOptions="Center">
                         <Frame x:Name="Kestabilan" Padding="5" IsVisible="False" BorderColor="White" BackgroundColor="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}">
                             <Label Text="KESTABILAN" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
@@ -36,11 +36,19 @@
                         </Frame>
                     </StackLayout>
                     <Frame HorizontalOptions="Center" Padding="5" BackgroundColor="White">
-                        <StackLayout Orientation="Horizontal">
-                            <avionics:AttitudeAvionic x:Name="IMU_Avionic" WidthRequest="{StaticResource Key=IMU_Dial}" HeightRequest="{StaticResource Key=IMU_Dial}" VerticalOptions="Center"/>
-                            <StackLayout Orientation="Vertical" VerticalOptions="Center">
-                                <Ellipse Fill="DimGray" Aspect="Uniform" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>
-                                <Ellipse Fill="DimGray" Aspect="Uniform" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>
+                        <StackLayout Orientation="Vertical">
+                            <Label Text="Click to collapse ▼" HorizontalOptions="Center" TextColor="Black">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="Collapsible_Clicked"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                            <StackLayout Orientation="Horizontal">
+                                <avionics:AttitudeAvionic x:Name="IMU_Avionic" WidthRequest="{StaticResource Key=IMU_Dial}" HeightRequest="{StaticResource Key=IMU_Dial}" VerticalOptions="Center"/>
+                                <StackLayout Orientation="Vertical" VerticalOptions="Center">
+                                    <avionics:AltimeterAvionic x:Name="Alti_Avionic" WidthRequest="{StaticResource Key=AUX_Dial}" HeightRequest="{StaticResource Key=AUX_Dial}"/>
+                                    <!--<Ellipse Fill="DimGray" Aspect="Uniform" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>-->
+                                    <avionics:BearingAvionic x:Name="Bearing_Avionic" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>
+                                </StackLayout>
                             </StackLayout>
                         </StackLayout>
                     </Frame>
@@ -50,6 +58,7 @@
                     <Button Text="Demo Visualisasi" TextColor="Black" BackgroundColor="CornflowerBlue" Clicked="DemoVisualisasi" VerticalOptions="Start" HorizontalOptions="Start"/>
                     <Button Text="Demo AES" TextColor="Black" BackgroundColor="Yellow" Clicked="Button_Clicked" VerticalOptions="Start" HorizontalOptions="Start"/>
                     <Button Text="Dump MAVLink AES" TextColor="Black" BackgroundColor="Yellow" Clicked="Button_Clicked_1" VerticalOptions="Start" HorizontalOptions="Start"/>
+                    <Button Text="Introduce Error" TextColor="White" BackgroundColor="DarkRed" Clicked="Button_Clicked_2" VerticalOptions="Start" HorizontalOptions="Start"/>
                     <Label Text="DEMO LABEL" x:Name="DemoLabel" FontSize="Medium" BackgroundColor="#AA101010"></Label>
                 </StackLayout>
                 <!--<Button Text="60s Flight Data Dump" TextColor="Black" BackgroundColor="Pink" Clicked="Button_Clicked_1" VerticalOptions="Start" HorizontalOptions="Start" IsVisible="False" IsEnabled="False"/>-->

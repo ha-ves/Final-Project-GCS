@@ -12,50 +12,52 @@
     <ContentView.Content>
         <Frame BackgroundColor="#EF000000" CornerRadius="8" Padding="0">
             <Grid>
-                <StackLayout x:Name="MainStack" Orientation="Vertical" Padding="10">
-                    <Label Text="Pilih Media komunikasi :" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalOptions="Center" Margin="0,10,0,10"/>
-                    <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Margin="0,5">
-                        <ImageButton Clicked="Btn_USB_Clicked" BackgroundColor="#FF000000" BorderColor="#00879D" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.usb.png}" Aspect="AspectFit" HeightRequest="{StaticResource Key=Conn_Dial}" Margin="10,0" CornerRadius="8"/>
-                        <BoxView Margin="0" BackgroundColor="#EFAFAFAF" WidthRequest="1"/>
-                        <ImageButton Clicked="Btn_WIFI_Clicked" BackgroundColor="#FF000000" BorderColor="#00879D" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.local-area.png}" Aspect="AspectFit" HeightRequest="{StaticResource Key=Conn_Dial}" Margin="10,0" CornerRadius="8"/>
-                    </StackLayout>
-                    <StackLayout x:Name="ConfigStack" IsVisible="false">
-                        <Label Text="Konfigurasi koneksi :" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalOptions="Center" Margin="0,20,0,10"/>
-                        <StackLayout Margin="0,0,0,10" Orientation="Horizontal" HorizontalOptions="Center">
-                            <Entry x:Name="IP_Address" Placeholder="(ie. 127.0.0.1)" Text="{Binding IP}" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}"/>
-                            <Entry Placeholder="(ie. 12727)" Text="{Binding Port}" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}"/>
-                            <Picker x:Name="IP_Proto" SelectedIndex="1">
-                                <Picker.Items>
-                                    <x:String>UDP</x:String>
-                                    <x:String>TCP</x:String>
-                                </Picker.Items>
-                            </Picker>
+                <ScrollView>
+                    <StackLayout x:Name="MainStack" Orientation="Vertical" Padding="10">
+                        <Label Text="Pilih Media komunikasi :" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalOptions="Center" Margin="0,10,0,10"/>
+                        <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Margin="0,5">
+                            <ImageButton Clicked="Btn_USB_Clicked" BackgroundColor="#FF000000" BorderColor="#00879D" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.usb.png}" Aspect="AspectFit" HeightRequest="{StaticResource Key=Conn_Dial}" Margin="10,0" CornerRadius="8"/>
+                            <BoxView Margin="0" BackgroundColor="#EFAFAFAF" WidthRequest="1"/>
+                            <ImageButton Clicked="Btn_WIFI_Clicked" BackgroundColor="#FF000000" BorderColor="#00879D" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.local-area.png}" Aspect="AspectFit" HeightRequest="{StaticResource Key=Conn_Dial}" Margin="10,0" CornerRadius="8"/>
                         </StackLayout>
-                        <StackLayout Margin="0,0,0,10" Orientation="Horizontal" HorizontalOptions="Center">
-                            <Picker x:Name="COM_Ports" ItemsSource="{Binding COMS}" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}" SelectedItem="{Binding SelectedCOM}"/>
-                            <Picker x:Name="BaudRates" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}" SelectedItem="{Binding SelectedBaud}">
-                                <Picker.Items>
-                                    <x:String>115200</x:String>
-                                    <x:String>57600</x:String>
-                                    <x:String>38400</x:String>
-                                    <x:String>19200</x:String>
-                                    <x:String>9600</x:String>
-                                    <x:String>1200</x:String>
-                                    <x:String>300</x:String>
-                                    <x:String>921600</x:String>
-                                    <x:String>460800</x:String>
-                                    <x:String>230400</x:String>
-                                    <x:String>4800</x:String>
-                                    <x:String>2400</x:String>
-                                    <x:String>150</x:String>
-                                    <x:String>110</x:String>
-                                </Picker.Items>
-                            </Picker>
+                        <StackLayout x:Name="ConfigStack" IsVisible="false">
+                            <Label Text="Konfigurasi koneksi :" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalOptions="Center" Margin="0,20,0,10"/>
+                            <StackLayout Margin="0,0,0,10" Orientation="Horizontal" HorizontalOptions="Center">
+                                <Entry x:Name="IP_Address" Placeholder="(ie. 127.0.0.1)" Text="{Binding IP}" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}" TextColor="White"/>
+                                <Entry Placeholder="(ie. 12727)" Text="{Binding Port}" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}" TextColor="White"/>
+                                <Picker x:Name="IP_Proto" SelectedIndex="1" TextColor="White">
+                                    <Picker.Items>
+                                        <x:String>UDP</x:String>
+                                        <x:String>TCP</x:String>
+                                    </Picker.Items>
+                                </Picker>
+                            </StackLayout>
+                            <StackLayout Margin="0,0,0,10" Orientation="Horizontal" HorizontalOptions="Center">
+                                <Picker x:Name="COM_Ports" ItemsSource="{Binding COMS}" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}" SelectedItem="{Binding SelectedCOM}"/>
+                                <Picker x:Name="BaudRates" HorizontalTextAlignment="Center" WidthRequest="{StaticResource Key=Conn_Dial}" SelectedItem="{Binding SelectedBaud}">
+                                    <Picker.Items>
+                                        <x:String>115200</x:String>
+                                        <x:String>57600</x:String>
+                                        <x:String>38400</x:String>
+                                        <x:String>19200</x:String>
+                                        <x:String>9600</x:String>
+                                        <x:String>1200</x:String>
+                                        <x:String>300</x:String>
+                                        <x:String>921600</x:String>
+                                        <x:String>460800</x:String>
+                                        <x:String>230400</x:String>
+                                        <x:String>4800</x:String>
+                                        <x:String>2400</x:String>
+                                        <x:String>150</x:String>
+                                        <x:String>110</x:String>
+                                    </Picker.Items>
+                                </Picker>
+                            </StackLayout>
+                            <Button Clicked="Confirm_Clicked" Text="Confirm" Margin="0,10,0,0"/>
                         </StackLayout>
-                        <Button Clicked="Confirm_Clicked" Text="Confirm" Margin="0,10,0,0"/>
                     </StackLayout>
-                </StackLayout>
-                <Button Text="X" Clicked="Close_Clicked" HorizontalOptions="End" VerticalOptions="Start" WidthRequest="40" HeightRequest="40" BackgroundColor="#AA101010"/>
+                </ScrollView>
+                <Button Text="X" Clicked="Close_Clicked" HorizontalOptions="End" VerticalOptions="Start" WidthRequest="40" HeightRequest="40" BackgroundColor="#AA101010" TextColor="White"/>
             </Grid>
         </Frame>
     </ContentView.Content>

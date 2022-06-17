@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TugasAkhir_GCS.Interfaces
 {
-    public delegate void NewDataReceived(object sender, byte[] data);
+    public delegate void NewDataReceived(object sender, byte[] data, DateTime receiveTime);
 
     public interface IReceiverService
     {

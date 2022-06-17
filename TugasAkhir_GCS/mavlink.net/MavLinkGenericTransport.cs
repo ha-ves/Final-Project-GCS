@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace MavLinkNet
 
         public event DataToSendDelegate OnPacketToSend;
 
-        public event PacketReceivedDelegate OnPacketReceived;
+        public event PacketReceivedDelegate OnPacketReceived, OnPacketDiscarded;
 
         public event EventHandler OnReceptionEnded;
 
@@ -58,6 +59,11 @@ namespace MavLinkNet
         protected void HandleReceptionEnded(object sender)
         {
             if (OnReceptionEnded != null) OnReceptionEnded(sender, EventArgs.Empty);
+        }
+
+        protected void HandlePacketDiscarded(object sender, MavLinkPacketBase packet)
+        {
+            if (OnPacketDiscarded != null) OnPacketDiscarded(sender, packet);
         }
     }
 }

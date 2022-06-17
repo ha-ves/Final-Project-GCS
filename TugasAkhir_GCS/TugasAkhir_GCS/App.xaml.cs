@@ -22,7 +22,7 @@ namespace TugasAkhir_GCS
     {
         public IReceiverService ReceiverService;
         
-        public MavLinkGenericTransport MavLinkTransport;
+        public MavLinkDefaultTransport MavLinkTransport;
         public ManualResetEventSlim MavLinkCmdAck = new ManualResetEventSlim(false);
 
         /* Transport variables */
@@ -34,8 +34,7 @@ namespace TugasAkhir_GCS
             0xe9, 0xbb, 0xb4, 0x2d, 0x4b, 0xbc, 0x37, 0xd0, 0xaa, 0x3f, 0x0e, 0xa6 };
 
         /* stopwatch benchmark */
-        public DateTime lastprocess;
-        public TimeSpan decrypt;
+        public DateTime packettime;
 
         public IFileHandler attsavefile, gpssavefile, syssavefile, hrtsavefile;
 
@@ -49,6 +48,9 @@ namespace TugasAkhir_GCS
 
             (MainPage as MainPage).HideLoadingOverlay();
 
+            DeviceDisplay.KeepScreenOn = true;
+
+#if DATA_FETCH
             var time = DateTime.Now.ToString("yyyy-MM-dd_ss-mm-HH");
 
             attsavefile = DependencyService.Get<IFileHandler>(DependencyFetchTarget.NewInstance);
@@ -59,27 +61,53 @@ namespace TugasAkhir_GCS
             syssavefile.Initialize($"SysStat_ProcessTime_{time}.csv");
             hrtsavefile = DependencyService.Get<IFileHandler>(DependencyFetchTarget.NewInstance);
             hrtsavefile.Initialize($"HrtBt_ProcessTime_{time}.csv");
+#endif
+        }
+
+        internal void FinishDataFetch()
+        {
+            attsavefile.Finish();
+            gpssavefile.Finish();
+            syssavefile.Finish();
+            hrtsavefile.Finish();
         }
 
         #region Transport
 
+        public Mutex consolemutex = new Mutex(false);
+
         public async Task<bool> InitializeTransport()
         {
-            attsavefile.WriteLine("ATTITUDE (IMU SENSOR) PROCESSING DATA");
-            attsavefile.WriteLine("Decrypt Time (ms),Parse time (ms),UI update time (ms)");
-            gpssavefile.WriteLine("GPS SENSOR PROCESSING DATA");
-            gpssavefile.WriteLine("Decrypt Time (ms),Parse time (ms),UI update time (ms)");
-            syssavefile.WriteLine("SYS STAT PROCESSING DATA");
-            syssavefile.WriteLine("Decrypt Time (ms),Parse time (ms),UI update time (ms)");
-            hrtsavefile.WriteLine("HEARTBEAT PROCESSING DATA");
-            hrtsavefile.WriteLine("Decrypt Time (ms),Parse time (ms),UI update time (ms)");
-
+#if DATA_FETCH
+            attsavefile.WriteLine("ATTITUDE (IMU SENSOR) UPDATE UI TIME (ms)");
+            //attsavefile.WriteLine("Decrypt Time (ms),Parse time (ms),UI update time (ms)");
+            gpssavefile.WriteLine("GPS SENSOR UPDATE UI TIME (ms)");
+            //gpssavefile.WriteLine("Decrypt Time (ms),Parse time (ms),UI update time (ms)");
+            syssavefile.WriteLine("SYS STAT UPDATE UI TIME (ms)");
+            //syssavefile.WriteLine("Decrypt Time (ms),Parse time (ms),UI update time (ms)");
+            hrtsavefile.WriteLine("HEARTBEAT UPDATE UI TIME (ms)");
+            //hrtsavefile.WriteLine("Decrypt Time (ms),Parse time (ms),UI update time (ms)");
+#endif
             if (MavLinkTransport != null)
                 MavLinkTransport.Dispose();
 
             MavLinkTransport = new MavLinkDefaultTransport();
 
             InitializeAES();
+
+            //if (consolemutex.WaitOne(0))
+            //{
+            //    Debug.Write($"Key -> [ ");
+            //    for (int i = 0; i < dec.Key.Length; i++)
+            //    {
+            //        Debug.Write($" {dec.Key[i]:X2} ");
+            //    }
+            //    Debug.WriteLine("]");
+
+            //    Debugger.Break();
+
+            //    consolemutex.ReleaseMutex();
+            //}
 
             ReceiverService.DataReceived += AESDecryptProcess;
             MavLinkTransport.OnPacketToSend += AESEncryptProcess;
@@ -102,21 +130,27 @@ namespace TugasAkhir_GCS
             }
         }
 
-        private void AESDecryptProcess(object sender, byte[] data)
+
+
+
+        public bool ErrorMavlink = false;
+
+        private void AESDecryptProcess(object sender, byte[] data, DateTime receiveTime)
         {
+            packettime = receiveTime;
+
             try
             {
-                //decryption.Restart();
-                lastprocess = DateTime.Now;
-
                 var plain = (App.Current as App).DecryptAndGetPlainBytes(data);
 
-                //decryption.Stop();
-                //updateUI.Restart();
-
-                decrypt = DateTime.Now - lastprocess;
-
-                lastprocess = DateTime.Now;
+                if (ErrorMavlink)
+                {
+                    byte[] rand = { 0, 0 };
+                    RandomNumberGenerator.Create().GetNonZeroBytes(rand);
+                    if (rand[0] > plain.Length) rand[0] = (byte)(plain.Length - 1);
+                    plain[rand[0]] = rand[1];
+                    ErrorMavlink = false;
+                }
 
                 MavLinkTransport.DataReceived(sender, plain);
 
@@ -145,9 +179,9 @@ namespace TugasAkhir_GCS
             }
         }
 
-        #endregion
+#endregion
 
-        #region MAVLINK
+#region MAVLINK
 
         private async Task<bool> InitMavLink()
         {
@@ -175,6 +209,7 @@ namespace TugasAkhir_GCS
 
             MavLinkTransport.OnPacketReceived -= temp;
             MavLinkTransport.OnPacketReceived += MavLinkReceived;
+            MavLinkTransport.OnPacketDiscarded += MavLinkDiscarded;
 
             //var timer = new System.Timers.Timer(1000);
             //timer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) => droppedPackets = 0;
@@ -186,6 +221,20 @@ namespace TugasAkhir_GCS
                 return false;
         }
 
+        private void MavLinkDiscarded(object sender, MavLinkPacketBase packet)
+        {
+            try
+            {
+                var crc = MavLinkPacketV20.GetPacketCrc(packet as MavLinkPacketV20);
+                Debug.WriteLine($"Discarded MavLink Packet | Expected Checksum is [ {packet.Checksum1:X2} {packet.Checksum2:X2} ] but calculated is [ {crc & 0xFF:X2} {crc >> 8:X2} ]");
+            }
+            catch (Exception)
+            {
+                return;
+            }
+            return;
+        }
+
         int totalPackets = 0;
         int droppedPackets = 0;
         ushort lastSeqNum = 0;
@@ -194,10 +243,6 @@ namespace TugasAkhir_GCS
         {
             Task.Run(() =>
             {
-                var msgprocess = DateTime.Now - lastprocess;
-
-                lastprocess = DateTime.Now;
-
                 //Debug.WriteLine("");
                 //Debug.WriteLine($"New {packet.Message} received. Processed in {msgprocess.TotalMilliseconds} ms since decryption.");
 
@@ -213,14 +258,15 @@ namespace TugasAkhir_GCS
                         break;
                     case UasSysStatus SysStat:
                         MavLinkCmdAck.Set();
-                        SysStat.DropRateComm = (ushort)(droppedPackets * 10000 / totalPackets);
+                        SysStat.DropRateComm = (ushort)droppedPackets.Map(0, droppedPackets + totalPackets, 0, 10000);
+                        //Debug.WriteLine($"Comm Dropped packets: {droppedPackets} out of {droppedPackets + totalPackets}");
                         totalPackets = 0;
                         droppedPackets = 0;
-                        (MainPage as MainPage).UpdateUI(packet.Message, msgprocess, lastprocess);
+                        (MainPage as MainPage).UpdateUI(packet.Message);
                         break;
                     default:
                         MavLinkCmdAck.Set();
-                        (MainPage as MainPage).UpdateUI(packet.Message, msgprocess, lastprocess);
+                        (MainPage as MainPage).UpdateUI(packet.Message);
                         break;
                 }
             });
@@ -292,9 +338,9 @@ namespace TugasAkhir_GCS
             return Task.FromResult(true);
         }
 
-        #endregion
+#endregion
 
-        #region AES
+#region AES
 
         internal void InitializeAES()
         {
@@ -333,8 +379,38 @@ namespace TugasAkhir_GCS
         {
             dec.IV = cipher.Take(16).ToArray();
 
+            var chip = cipher.Skip(16).ToArray();
+
+            //if (consolemutex.WaitOne(0) && cipher.Length > 50)
+            //{
+            //    Debug.Write($"Key -> [ ");
+            //    for (int i = 0; i < dec.Key.Length; i++)
+            //    {
+            //        Debug.Write($"{dec.Key[i]:X2}");
+            //    }
+            //    Debug.WriteLine(" ]");
+
+            //    Debug.Write($"IV -> [ ");
+            //    for (int i = 0; i < dec.IV.Length; i++)
+            //    {
+            //        Debug.Write($"{dec.IV[i]:X2}");
+            //    }
+            //    Debug.WriteLine(" ]");
+
+            //    Debug.Write($"Ciphertext -> [ ");
+            //    for (int i = 0; i < chip.Length; i++)
+            //    {
+            //        Debug.Write($"{chip[i]:X2}");
+            //    }
+            //    Debug.WriteLine(" ]");
+
+            //    Debugger.Break();
+
+            //    consolemutex.ReleaseMutex();
+            //}
+
             // Create the streams used for decryption.
-            using (var msDecrypt = new MemoryStream(cipher.Skip(16).ToArray()))
+            using (var msDecrypt = new MemoryStream(chip))
             {
                 using (var csDecrypt = new CryptoStream(msDecrypt, dec.CreateDecryptor(), CryptoStreamMode.Read))
                 {

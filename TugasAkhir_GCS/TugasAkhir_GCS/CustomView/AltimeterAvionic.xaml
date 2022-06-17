@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:TugasAkhir_GCS"
+             x:Class="TugasAkhir_GCS.CustomView.AltimeterAvionic">
+  <ContentView.Content>
+        <Frame Padding="5" BackgroundColor="#00879D" CornerRadius="{StaticResource AUX_Dial_Radius}">
+            <Frame Padding="0" CornerRadius="{StaticResource AUX_Dial_Radius}">
+                <Grid>
+                    <Image Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.Altimeter.png}"/>
+                    <Image x:Name="alti_needle" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.Alti-needle.png}" Rotation="{Binding Rotate}"/>
+                </Grid>
+            </Frame>
+        </Frame>
+    </ContentView.Content>
+</ContentView>

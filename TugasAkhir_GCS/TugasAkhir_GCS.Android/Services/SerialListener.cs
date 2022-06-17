@@ -20,7 +20,7 @@ namespace TugasAkhir_GCS.Droid.Services
 
         public void OnNewData(byte[] p0)
         {
-            if (DataReceived != null) DataReceived(this, p0);
+            if (DataReceived != null) DataReceived(this, p0, DateTime.Now);
         }
 
         #region unused

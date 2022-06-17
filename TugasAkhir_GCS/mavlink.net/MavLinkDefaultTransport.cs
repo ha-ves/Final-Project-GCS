@@ -70,15 +70,17 @@ namespace MavLinkNet
         private void InitializeMavLink()
         {
             mMavLink.PacketReceived += HandlePacketReceived;
+            mMavLink.PacketDiscarded += HandlePacketDiscarded;
         }
 
+
         // __ Receive _________________________________________________________
-        
-        
+
+
         public override void DataReceived(object sender, byte[] data)
         {
             mReceiveQueue.Enqueue(data);
-
+            
             // Signal processReceive thread
             mReceiveSignal.Set();
         }
@@ -87,9 +89,12 @@ namespace MavLinkNet
         {
             Thread.CurrentThread.Name = "ProcessReceiveQueue";
 
+            int id = 0;
+
             while (true)
             {
                 byte[] buffer;
+                DateTime packetTime;
 
                 mReceiveSignal.WaitOne();
 

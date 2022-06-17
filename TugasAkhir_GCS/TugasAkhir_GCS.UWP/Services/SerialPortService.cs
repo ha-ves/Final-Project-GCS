@@ -127,8 +127,11 @@ namespace TugasAkhir_GCS.UWP.Services
 
                 if (RxBuf.Length > 0)
                 {
-                    Debug.WriteLine($"SerialReader received -> {RxBuf.Length}[");
+                    //Debug.WriteLine($"SerialReader received -> {RxBuf.Length}[");
+                    var receiveTime = DateTime.Now;
+
                     int count = 0;
+
                     foreach (var hex in RxBuf.ToArray())
                     {
                         Debug.Write($" {hex:X2} ");
@@ -140,7 +143,7 @@ namespace TugasAkhir_GCS.UWP.Services
                     }
                     Debug.WriteLine("]");
 
-                    if (DataReceived != null) DataReceived(this, RxBuf.ToArray());
+                    if (DataReceived != null) DataReceived(this, RxBuf.ToArray(), receiveTime);
                 }
             }
         }

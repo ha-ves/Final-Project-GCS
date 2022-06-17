@@ -31,6 +31,7 @@ namespace TugasAkhir_GCS
 
             //use UDP
             //NetSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            //NetSocket.Bind(new IPEndPoint(IPAddress.Any, 64625));
             NetSocket = new UdpClient(64625).Client;
 
             await Task.WhenAny(Task.Delay(5000), Task.Run(() =>
@@ -82,6 +83,7 @@ namespace TugasAkhir_GCS
 
         private void WIFIReceived(IAsyncResult ar)
         {
+            var receiveTime = DateTime.Now;
             if (NetSocket == null)
                 return;
 
@@ -102,20 +104,25 @@ namespace TugasAkhir_GCS
             
             NetSocket.BeginReceive(RxBuf, 0, RxBuf.Length, SocketFlags.None, WIFIReceived, null);
 
-            //Debug.WriteLine($"New WIFI Data (encrypted) -> {bytes} bytes");
-            //int count = 0;
-            //for (int i = 0; i < bytes; i++)
+            //if ((App.Current as App).consolemutex.WaitOne(0))
             //{
-            //    Debug.Write($" {RxBuf[i]:X2} ");
-            //    if (++count > 15)
+            //    Debug.WriteLine($"New WIFI Data (encrypted) -> {bytes} bytes");
+            //    int count = 0;
+            //    for (int i = 0; i < bytes; i++)
             //    {
-            //        Debug.WriteLine("");
-            //        count = 0;
+            //        Debug.Write($"{RxBuf[i]:X2}");
+            //        if (++count > 15)
+            //        {
+            //            Debug.WriteLine("");
+            //            count = 0;
+            //        }
             //    }
-            //}
-            //Debug.WriteLine("");
+            //    Debug.WriteLine("");
 
-            if (DataReceived != null) Task.Run(() => DataReceived(this, RxBuf.Take(bytes).ToArray()));
+            //    (App.Current as App).consolemutex.ReleaseMutex();
+            //}
+
+            if (DataReceived != null) Task.Run(() => DataReceived(this, RxBuf.Take(bytes).ToArray(), receiveTime));
         }
 
         public void SendData(object sender, byte[] buffer) => NetSocket.Send(buffer);

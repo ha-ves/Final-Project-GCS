@@ -32,17 +32,19 @@ namespace TugasAkhir_GCS
         ConnectionArgs ConnArgs;
 
         ObservableCollection<string> _coms = new ObservableCollection<string>();
-        public ObservableCollection<string> COMS { get { return _coms; } set { _coms = value; OnPropertyChanged("COMS"); } }
+        public ObservableCollection<string> COMS { get => _coms; set { _coms = value; OnPropertyChanged("COMS"); } }
 
         string _selectedCom;
-        public string SelectedCOM { get { return _selectedCom; } set { _selectedCom = value; OnPropertyChanged("SelectedCOM"); } }
+        public string SelectedCOM { get => _selectedCom; set { _selectedCom = value; OnPropertyChanged("SelectedCOM"); } }
+
         string _selectedBaud;
-        public string SelectedBaud { get { return _selectedBaud; } set { _selectedBaud = value; OnPropertyChanged("SelectedBaud"); } }
+        public string SelectedBaud { get => _selectedBaud; set { _selectedBaud = value; OnPropertyChanged("SelectedBaud"); } }
 
         string _ipaddr = "192.168.4.1";
-        public string IP { get { return _ipaddr; } set { _ipaddr = value; OnPropertyChanged("IP"); } }
+        public string IP { get => _ipaddr; set { _ipaddr = value; OnPropertyChanged("IP"); } }
+
         string _port = "61258";
-        public string Port { get { return _port; } set { _port = value; OnPropertyChanged("Port"); } }
+        public string Port { get => _port; set { _port = value; OnPropertyChanged("Port"); } }
 
         public ConnectionSettings()
         {

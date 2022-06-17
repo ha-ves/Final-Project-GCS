@@ -28,16 +28,16 @@ namespace TugasAkhir_GCS
 
         /* Flight data variables */
         string _flightMode = "offline";
-        public string FlightMode { get => _flightMode; }
+        public string FlightMode { get => _flightMode; set { _flightMode = value; OnPropertyChanged("FlightMode"); } }
 
         string _battPercent = "batt : n/a %";
-        public string BattPercent { get => _battPercent; }
+        public string BattPercent { get => _battPercent; set { _battPercent = value; OnPropertyChanged("BattPercent"); } }
 
         string _signalPercent = "rssi : n/a %";
-        public string SignalPercent { get => _signalPercent; }
+        public string SignalPercent { get => _signalPercent; set { _signalPercent = value; OnPropertyChanged("SignalPercent"); } }
 
         string _flightTime = "t+00:00:00.00";
-        public string FlightTime { get => _flightTime; }
+        public string FlightTime { get => _flightTime; set { _flightTime = value; OnPropertyChanged("FlightTime"); } }
 
         System.Timers.Timer FlightTimer;
         Stopwatch FlightStopwatch;
@@ -83,60 +83,77 @@ namespace TugasAkhir_GCS
 
         #region Update UI
 
-        public void UpdateUI(UasMessage msg, TimeSpan msgprocess, DateTime lastprocess)
+        public void UpdateUI(UasMessage msg)
         {
             //Debug.WriteLine($"New {msg}");
-
-            var updateui = DateTime.Now - lastprocess;
+            TimeSpan updateui;
 
             switch (msg)
             {
                 case UasSysStatus SysStat:
                     UpdateBatt(SysStat.BatteryRemaining);
                     UpdateSignal(SysStat.DropRateComm);
+#if DATA_FETCH
+                    updateui = DateTime.Now - (App.Current as App).packettime;
 
                     (App.Current as App).syssavefile.WriteLine(
-                        $"{(App.Current as App).decrypt.TotalMilliseconds}," +
-                        $"{msgprocess.TotalMilliseconds}," +
+                        //$"{(App.Current as App).decrypt.TotalMilliseconds}," +
+                        //$"{msgprocess.TotalMilliseconds}," +
                         $"{updateui.TotalMilliseconds}");
+#endif
                     break;
                 case UasGlobalPositionInt Gps:
                     UpdateGPS(Gps.Lat, Gps.Lon);
                     UpdateBearing(Gps.Hdg);
+                    Alti_Avionic.UpdateUI(Gps.RelativeAlt);
+#if DATA_FETCH
+                    updateui = DateTime.Now - (App.Current as App).packettime;
 
                     (App.Current as App).gpssavefile.WriteLine(
-                        $"{(App.Current as App).decrypt.TotalMilliseconds}," +
-                        $"{msgprocess.TotalMilliseconds}," +
+                        //$"{(App.Current as App).decrypt.TotalMilliseconds}," +
+                        //$"{msgprocess.TotalMilliseconds}," +
                         $"{updateui.TotalMilliseconds}");
+#endif
                     break;
                 case UasAttitude Att:
                     UpdateAtt(Att.Yaw, Att.Pitch, Att.Roll);
                     UpdateKestabilanTerbang();
-
+#if DATA_FETCH
+                    updateui = DateTime.Now - (App.Current as App).packettime;
+                        
                     (App.Current as App).attsavefile.WriteLine(
-                        $"{(App.Current as App).decrypt.TotalMilliseconds}," +
-                        $"{msgprocess.TotalMilliseconds}," +
+                        //$"{(App.Current as App).decrypt.TotalMilliseconds}," +
+                        //$"{msgprocess.TotalMilliseconds}," +
                         $"{updateui.TotalMilliseconds}");
+#endif
                     break;
                 case UasHeartbeat HrtBt:
                     UpdateFlightMode(HrtBt.SystemStatus);
+#if DATA_FETCH
+                    updateui = DateTime.Now - (App.Current as App).packettime;
 
                     (App.Current as App).hrtsavefile.WriteLine(
-                        $"{(App.Current as App).decrypt.TotalMilliseconds}," +
-                        $"{msgprocess.TotalMilliseconds}," +
+                        //$"{(App.Current as App).decrypt.TotalMilliseconds}," +
+                        //$"{msgprocess.TotalMilliseconds}," +
                         $"{updateui.TotalMilliseconds}");
+#endif
                     break;
                 default:
                     return;
             }
 
+#if DATA_FETCH
             Debug.WriteLine($"UI {msg} updated in {updateui.TotalMilliseconds} ms");
+#endif
         }
 
         private void UpdateFlightMode(MavState state)
         {
-            _flightMode = Enum.GetName(typeof(MavState), state);
-            OnPropertyChanged("FlightMode");
+#if DATA_FETCH
+            MainThread.BeginInvokeOnMainThread(() => fmode.Text = Enum.GetName(typeof(MavState), state));
+#else
+            FlightMode = Enum.GetName(typeof(MavState), state);
+#endif
         }
 
         private void UpdateAtt(float yawRad, float pitchRad, float rollRad)
@@ -222,7 +239,12 @@ namespace TugasAkhir_GCS
                 }
                 else
                     Kestabilan.IsVisible = false;
-            });
+            })
+#if DATA_FETCH
+            .Wait();
+#else
+            ;
+#endif
         }
 
         private void UpdateGPS(int lat, int lon)
@@ -242,23 +264,47 @@ namespace TugasAkhir_GCS
                 return;
 
             MapView.UpdateBearing((float)((hdg - 9000 + 36000) % 36000 / 100.0));
+            Bearing_Avionic.UpdateUI((float)(hdg / 100.0));
         }
 
-        private void UpdateBatt(sbyte batteryRemaining)
+        private async void UpdateBatt(sbyte batteryRemaining)
         {
-            _battPercent = $"batt : {batteryRemaining} %";
-            OnPropertyChanged("BattPercent");
+#if DATA_FETCH
+            MainThread.BeginInvokeOnMainThread(() => batt.Text = $"batt : {batteryRemaining} %");
+#else
+            BattPercent = $"batt : {batteryRemaining} %";
+#endif
         }
 
-        private void UpdateSignal(ushort dropRateComm)
+        private async void UpdateSignal(ushort dropRateComm)
         {
-            _signalPercent = $"rssi : {100.0 - (dropRateComm / 100.0):0.00} %";
-            OnPropertyChanged("SignalPercent");
+#if DATA_FETCH
+            MainThread.BeginInvokeOnMainThread(() => sig.Text = $"rssi : {100.0 - (dropRateComm / 100.0):0.00} %");
+#else
+            SignalPercent = $"rssi : {100.0 - (dropRateComm / 100.0):0.00} %";
+#endif
         }
 
-        #endregion
+#endregion
 
-        #region Button events
+#region Button events
+
+
+        private void Collapsible_Clicked(object sender, EventArgs e)
+        {
+            var lbl = sender as Label;
+            var stack = (lbl.Parent as StackLayout).Children.First(view => view.GetType() == typeof(StackLayout));
+            if (stack.IsVisible)
+            {
+                stack.IsVisible = false;
+                lbl.Text = "Click to expand ▲";
+            }
+            else
+            {
+                stack.IsVisible = true;
+                lbl.Text = "Click to collapse ▼";
+            }
+        }
 
         private void ConnSettings_Confirmed(object sender, ConnectionArgs ConnArgs)
         {
@@ -381,10 +427,7 @@ namespace TugasAkhir_GCS
 
                 ShowLoadingOverlay("Memutuskan koneksi UAV . . .");
 
-                (App.Current as App).attsavefile.Finish();
-                (App.Current as App).gpssavefile.Finish();
-                (App.Current as App).syssavefile.Finish();
-                (App.Current as App).hrtsavefile.Finish();
+                (App.Current as App).FinishDataFetch();
 
                 if (!await (App.Current as App).ReceiverService.Disconnect())
                     return;
@@ -417,11 +460,10 @@ namespace TugasAkhir_GCS
         {
             FlightStopwatch = Stopwatch.StartNew();
 
-            FlightTimer = new System.Timers.Timer(1 / 60.0);
-            FlightTimer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) =>
+            FlightTimer = new System.Timers.Timer(1 / 30.0);
+            FlightTimer.Elapsed += async (object sender, System.Timers.ElapsedEventArgs e) =>
             {
-                _flightTime = "t+" + FlightStopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.ff");
-                OnPropertyChanged("FlightTime");
+                FlightTime = "t+" + FlightStopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.ff");
             };
             FlightTimer.Start();
         }
@@ -439,19 +481,19 @@ namespace TugasAkhir_GCS
             }
         }
 
-        #endregion
+#endregion
 
-        #region Demo
+#region Demo
 
-        #region Demo AES
+#region Demo AES
 
 
 
-        #endregion
+#endregion
 
-        #endregion
+#endregion
 
-        #region AES Testing
+#region AES Testing
 
         private async void Button_Clicked(object sender, EventArgs e)
         {
@@ -498,9 +540,9 @@ namespace TugasAkhir_GCS
             HideLoadingOverlay();
         }
 
-        #endregion
+#endregion
 
-        #region MavLink Dump
+#region MavLink Dump
 
         private async void Button_Clicked_1(object sender, EventArgs e)
         {
@@ -591,9 +633,9 @@ namespace TugasAkhir_GCS
             HideLoadingOverlay();
         }
 
-        #endregion
+#endregion
 
-        #region Dummy Update UI
+#region Dummy Update UI
 
         System.Timers.Timer test = new System.Timers.Timer(1000);
         bool Stopped = true;
@@ -644,6 +686,11 @@ namespace TugasAkhir_GCS
             });
         }
 
-    #endregion
+#endregion
+
+        private void Button_Clicked_2(object sender, EventArgs e)
+        {
+            (App.Current as App).ErrorMavlink = true;
+        }
     }
 }

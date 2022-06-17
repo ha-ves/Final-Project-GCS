@@ -32,7 +32,8 @@ namespace TugasAkhir_GCS.UWP.Services
 
         public void WriteLine(string line)
         {
-            savefile.WriteString(line + Environment.NewLine);
+            if(savefile != null)
+                savefile.WriteString(line + Environment.NewLine);
         }
 
         public async void Finish()
