@@ -25,7 +25,7 @@ namespace TugasAkhir_GCS.CustomView
             InitializeComponent();
         }
 
-        public async void UpdateUI(int altitude)
+        public void UpdateUI(int altitude)
         {
             var rot = ((float)altitude).Map(0, 45000.0f, 0, 270.0f);
 
@@ -34,7 +34,10 @@ namespace TugasAkhir_GCS.CustomView
 #if DATA_FETCH
             MainThread.BeginInvokeOnMainThread(() => alti_needle.Rotation = rot);
 #else
-            Rotate = rot;      
+            new Animation(val =>
+            {
+                Rotate = (float)val;
+            }, start: Rotate, end: rot).Commit(this, "TransYAnim", length: App.Current.Resources["AnimLength"] as OnIdiom<byte>);
 #endif
         }
     }

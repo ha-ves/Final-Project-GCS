@@ -43,20 +43,20 @@ namespace TugasAkhir_GCS.CustomView
                 Horizon.TranslationY = transY;
             });
 #else
-            new Animation(async val =>
+            new Animation(val =>
             {
                 Rotate = (float)val;
-            }, Rotate, rotate).Commit(this, "RotateAnim", rate: 5, length: 30);
+            }, start: Rotate, rotate).Commit(this, "RotateAnim", length: App.Current.Resources["AnimLength"] as OnIdiom<byte>);
 
-            new Animation(async val =>
+            new Animation(val =>
             {
                 TransX = (float)val;
-            }, TransX, transX).Commit(this, "TransXAnim", rate: 5, length: 30);
+            }, start: TransX, transX).Commit(this, "TransXAnim", length: App.Current.Resources["AnimLength"] as OnIdiom<byte>);
 
-            new Animation(async val =>
+            new Animation(val =>
             {
                 TransY = (float)val;
-            }, TransY, transY).Commit(this, "TransYAnim", rate: 5, length: 30);
+            }, start: TransY, transY).Commit(this, "TransYAnim", length: App.Current.Resources["AnimLength"] as OnIdiom<byte>);
 #endif
         }
     }

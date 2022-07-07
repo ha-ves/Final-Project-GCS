@@ -21,7 +21,7 @@ namespace TugasAkhir_GCS.Interfaces
         /// </summary>
         /// <returns><b><i>COM Ports</i></b> string array.
         /// <b><i>empty</i></b> if no ports are found.</returns>
-        Task<string[]> RefreshSerialPorts();
+        Task<string[]> RefreshSerialPorts(CancellationToken canceltoken);
 
         /// <summary>
         /// Connect to the serial port.

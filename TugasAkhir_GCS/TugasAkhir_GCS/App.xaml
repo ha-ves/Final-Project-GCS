@@ -3,7 +3,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TugasAkhir_GCS.App">
     <Application.Resources>
-        <OnPlatform x:Key="IMU_Dial_Radius" x:TypeArguments="x:Single">
+        <OnIdiom x:Key="AnimLength" x:TypeArguments="x:Byte" Default="50"/>
+
+        <OnIdiom x:Key="IMU_Dial_Radius" x:TypeArguments="x:Single"
+                 Desktop="120"
+                 Tablet="90"
+                 Phone="45"/>
+        <OnIdiom x:Key="AUX_Dial_Radius" x:TypeArguments="x:Single"
+                 Desktop="60"
+                 Tablet="45"
+                 Phone="22.5"/>
+
+        <OnIdiom x:Key="IMU_Dial" x:TypeArguments="x:Double"
+                 Desktop="240"
+                 Tablet="180"
+                 Phone="90"/>
+        <OnIdiom x:Key="AUX_Dial" x:TypeArguments="x:Double"
+                 Desktop="120"
+                 Tablet="90"
+                 Phone="45"/>
+
+        <OnIdiom x:Key="BotPanelCollapsedTransY" x:TypeArguments="x:Int16"
+                 Desktop="260"
+                 Tablet="130"
+                 Phone="65"/>
+
+        <!--<OnPlatform x:Key="IMU_Dial_Radius" x:TypeArguments="x:Single">
             <On Platform="UWP" Value="120"/>
             <On Platform="Android" Value="90"/>
         </OnPlatform>
@@ -19,11 +44,16 @@
         <OnPlatform x:Key="AUX_Dial" x:TypeArguments="x:Double">
             <On Platform="UWP" Value="120"/>
             <On Platform="Android" Value="90"/>
-        </OnPlatform>
-        
+        </OnPlatform>-->
+
         <OnPlatform x:Key="TopBar_Margin" x:TypeArguments="Thickness">
             <On Platform="UWP" Value="0,-32,0,0"/>
             <On Platform="Android" Value="0,-32,0,0"/>
         </OnPlatform>
+
+        <!--<OnPlatform x:Key="BotPanelCollapsedTransY" x:TypeArguments="x:Byte">
+            <On Platform="UWP" Value="260"/>
+            <On Platform="Android" Value="150"/>
+        </OnPlatform>-->
     </Application.Resources>
 </Application>

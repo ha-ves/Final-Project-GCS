@@ -19,12 +19,13 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Animation = Xamarin.Forms.Animation;
 
 namespace TugasAkhir_GCS
 {
     public partial class MapView : ContentView
     {
-        Pin Wahana, Home;
+        public Pin Wahana, Home;
 
         public MapView()
         {
@@ -32,14 +33,15 @@ namespace TugasAkhir_GCS
 
             mapView.MyLocationLayer.Enabled = false;
             mapView.RotationLock = false;
+            mapView.UseDoubleTap = true;
 
             mapView.Map.CRS = "EPSG:3857";
             mapView.Map.Transformation = new MinimalTransformation();
             mapView.Map.Layers.Add(new TileLayer(
-                KnownTileSources.Create(
+                tileSource: KnownTileSources.Create(
                     KnownTileSource.BingAerial,
                     Variables.BING_MAPS_API_KEY,
-                    new BruTile.Cache.FileCache(
+                    new FileCache(
                         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
                         + @"\MapCache\", "mdat")
                     )
@@ -64,7 +66,7 @@ namespace TugasAkhir_GCS
             ), ScaleMethod.Fit);
         }
 
-        public void UpdateGPS(int lat, int lon)
+        public void UpdateGPS(int lat, int lon, int alt)
         {
             if (Wahana == null)
             {
@@ -78,7 +80,7 @@ namespace TugasAkhir_GCS
                 };
                 mapView.Pins.Add(Wahana);
 
-                Wahana.Position = new Position(lat / 10000000.0, lon / 10000000.0);
+                Wahana.Position = new Position(lat * 0.0000001, lon * 0.0000001);
 
                 mapView.Navigator.NavigateTo(
                     SphericalMercator.FromLonLat(Wahana.Position.Longitude, Wahana.Position.Latitude),
@@ -94,31 +96,36 @@ namespace TugasAkhir_GCS
                 };
                 mapView.Pins.Add(Home);
 
-                Home.Position = new Position(lat / 10000000.0, lon / 10000000.0);
+                Home.Position = new Position(lat * 0.0000001, lon * 0.0000001);
+                (App.Current as App).ReturnTime.Home = new MavLinkNet.UasGlobalPositionInt() { Lat = lat, Lon = lon, RelativeAlt = alt };
 
                 return;
             }
 #if DATA_FETCH
-            Wahana.Position = new Position(lat / 10000000.0, lon / 10000000.0);
+            Wahana.Position = new Position(lat * 0.0000001, lon * 0.0000001);
 #else
+            (App.Current as App).ReturnTime.UAV = new MavLinkNet.UasGlobalPositionInt() { Lat = lat, Lon = lon, RelativeAlt = alt };
+
             var asal_pos = Wahana.Position;
-            var temp_pos = new Position(lat / 10000000.0, lon / 10000000.0);
+            var temp_pos = new Position(lat * 0.0000001, lon * 0.0000001);
 
-            AnimationExtensions.Animate<Position>(self: this, name: "PositionAnim", rate: 5, length: 30,
-            transform: (time) =>
-            {
-                var lat_interpolated = asal_pos.Latitude
-                                    + ((temp_pos.Latitude - asal_pos.Latitude)
-                                    * time);
+            AnimationExtensions.Animate(this, name: "PositionAnim", length: App.Current.Resources["AnimLength"] as OnIdiom<byte>,
+                transform: (time) =>
+                {
+                    var lat_interpolated = asal_pos.Latitude
+                                        + ((temp_pos.Latitude - asal_pos.Latitude)
+                                        * time);
 
-                var lon_interpolated = asal_pos.Longitude
-                                    + ((temp_pos.Longitude - asal_pos.Longitude)
-                                    * time);
+                    var lon_interpolated = asal_pos.Longitude
+                                        + ((temp_pos.Longitude - asal_pos.Longitude)
+                                        * time);
 
-                return new Position(lat_interpolated, lon_interpolated);
-            },
-            callback: (val) => Wahana.Position = val,
-            finished: (endpos, finished) => Wahana.Position = endpos);
+                    return new Position(lat_interpolated, lon_interpolated);
+                },
+                callback: (val) => Wahana.Position = val/*,
+                finished: (endpos, finished) => {
+                    Wahana.Position = endpos;
+                }*/);
 #endif
         }
 
@@ -138,10 +145,10 @@ namespace TugasAkhir_GCS
 #if DATA_FETCH
             Wahana.Rotation = bearing;
 #else
-            new Xamarin.Forms.Animation(start: Wahana.Rotation, end: hdg,
-            callback: val => Wahana.Rotation = (float)val,
-            finished: () => Wahana.Rotation = bearing
-            ).Commit(this, "HeadingAnim", rate: 10, length: 30, easing: Xamarin.Forms.Easing.SinInOut);
+            new Animation(start: Wahana.Rotation, end: hdg,
+                callback: val => Wahana.Rotation = (float)val,
+                finished: () => Wahana.Rotation = bearing
+            ).Commit(this, "HeadingAnim", length: App.Current.Resources["AnimLength"] as OnIdiom<byte>, easing: Xamarin.Forms.Easing.SinInOut);
 #endif
         }
     }

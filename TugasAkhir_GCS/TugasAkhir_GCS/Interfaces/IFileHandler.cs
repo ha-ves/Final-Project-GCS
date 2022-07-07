@@ -9,6 +9,8 @@ namespace TugasAkhir_GCS.Interfaces
     {
         void Initialize(string filepath);
 
+        void Write(string str);
+
         void WriteLine(string line);
 
         void Finish();

@@ -3,11 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TugasAkhir_GCS.ConnectionSettings"
              xmlns:local="clr-namespace:TugasAkhir_GCS">
+    <ContentView.GestureRecognizers>
+        <PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated"/>
+    </ContentView.GestureRecognizers>
     <ContentView.Resources>
-        <OnPlatform x:Key="Conn_Dial" x:TypeArguments="x:Double">
-            <On Platform="UWP" Value="140"/>
-            <On Platform="Android" Value="120"/>
-        </OnPlatform>
+        <OnIdiom x:Key="Conn_Dial" x:TypeArguments="x:Double"
+                 Desktop="140"
+                 Tablet="120"
+                 Phone="60"/>
     </ContentView.Resources>
     <ContentView.Content>
         <Frame BackgroundColor="#EF000000" CornerRadius="8" Padding="0">

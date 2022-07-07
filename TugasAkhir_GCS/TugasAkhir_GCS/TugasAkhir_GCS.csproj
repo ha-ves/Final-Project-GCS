@@ -8,11 +8,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>$(DefineConstants);DATA_FETCH</DefineConstants>
+    <DefineConstants>$(DefineConstants);USE_FIT_LINE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>$(DefineConstants);DATA_FETCH</DefineConstants>
+    <DefineConstants>$(DefineConstants);USE_FIT_LINE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +24,7 @@
     <None Remove="Resources\Images\Alti-needle.png" />
     <None Remove="Resources\Images\Altimeter.png" />
     <None Remove="Resources\Images\bearing-wheel.png" />
+    <None Remove="Resources\Images\clock.png" />
     <None Remove="Resources\Images\follow_uav.png" />
     <None Remove="Resources\Images\follow_uav_active.png" />
     <None Remove="Resources\Images\follow_uav_inactive.png" />
@@ -34,6 +35,7 @@
     <None Remove="Resources\Images\quadcopter.png" />
     <None Remove="Resources\Images\settings.png" />
     <None Remove="Resources\Images\usb.png" />
+    <None Remove="Resources\Images\warning.png" />
     <None Remove="Resources\Images\wp.png" />
     <None Remove="Resources\logo.png" />
   </ItemGroup>
@@ -47,6 +49,7 @@
     <EmbeddedResource Include="Resources\Images\Altimeter.png" />
     <EmbeddedResource Include="Resources\Images\Alti-needle.png" />
     <EmbeddedResource Include="Resources\Images\bearing-wheel.png" />
+    <EmbeddedResource Include="Resources\Images\clock.png" />
     <EmbeddedResource Include="Resources\Images\follow_uav_active.png" />
     <EmbeddedResource Include="Resources\Images\follow_uav_inactive.png" />
     <EmbeddedResource Include="Resources\Images\home-ico.png" />
@@ -57,17 +60,21 @@
     <EmbeddedResource Include="Resources\Images\quadcopter.png" />
     <EmbeddedResource Include="Resources\Images\settings.png" />
     <EmbeddedResource Include="Resources\Images\usb.png" />
+    <EmbeddedResource Include="Resources\Images\warning.png" />
     <EmbeddedResource Include="Resources\Images\wp.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Accord.Fuzzy" Version="3.8.0" />
     <PackageReference Include="Mapsui.Forms" Version="3.0.2" />
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
-    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2291" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2478" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\FLS\FLS.csproj" />
     <ProjectReference Include="..\mavlink.net\mavlink.net.csproj" />
   </ItemGroup>
 

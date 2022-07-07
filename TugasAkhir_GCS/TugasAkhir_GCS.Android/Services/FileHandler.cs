@@ -36,6 +36,11 @@ namespace TugasAkhir_GCS.Droid.Services
             savefile.AutoFlush = false;
         }
 
+        public void Write(string str)
+        {
+            savefile.Write(str);
+        }
+
         public void WriteLine(string line)
         {
             savefile.WriteLine(line);

@@ -5,8 +5,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TugasAkhir_GCS.Interfaces;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -26,13 +28,13 @@ namespace TugasAkhir_GCS
 
     public partial class ConnectionSettings : ContentView, INotifyPropertyChanged
     {
-        public delegate void ConfirmedDelegate(object sender, ConnectionArgs ConnArgs);
-        public event ConfirmedDelegate Confirmed;
+        public delegate void ConnSettingDelegate(object sender, ConnectionArgs ConnArgs);
+        public event ConnSettingDelegate Confirmed;
 
         ConnectionArgs ConnArgs;
 
-        ObservableCollection<string> _coms = new ObservableCollection<string>();
-        public ObservableCollection<string> COMS { get => _coms; set { _coms = value; OnPropertyChanged("COMS"); } }
+        public ObservableRangeCollection<string> _coms = new ObservableRangeCollection<string>() { "Tidak ada perangkat yang tersambung." };
+        public ObservableRangeCollection<string> COMS { get => _coms; set => _coms = value; }
 
         string _selectedCom;
         public string SelectedCOM { get => _selectedCom; set { _selectedCom = value; OnPropertyChanged("SelectedCOM"); } }
@@ -45,6 +47,9 @@ namespace TugasAkhir_GCS
 
         string _port = "61258";
         public string Port { get => _port; set { _port = value; OnPropertyChanged("Port"); } }
+
+        /* panning variables */
+        double LastX, LastY;
 
         public ConnectionSettings()
         {
@@ -61,7 +66,7 @@ namespace TugasAkhir_GCS
             {
                 if((App.Current as App).ReceiverService != null)
                     await (App.Current as App).ReceiverService.Disconnect();
-                (App.Current as App).ReceiverService = DependencyService.Get<IReceiverService>(DependencyFetchTarget.NewInstance);
+                (App.Current as App).ReceiverService = DependencyService.Get<IReceiverService>();
             }
 
             (App.Current.MainPage as MainPage).ShowLoadingOverlay("Refreshing...");
@@ -69,12 +74,28 @@ namespace TugasAkhir_GCS
             Debug.WriteLine("USB BUTTON TAPPED");
             ConnArgs.ConnType = ConnectionType.USB;
 
-            COMS.Clear();
-            foreach (var com in await (App.Current as App).ReceiverService.RefreshSerialPorts())
-                COMS.Add(com);
+            var lastcoms = COMS.ToArray();
+
+            var canceltoken = new CancellationTokenSource(5000);
+
+            Debug.WriteLine($"COMS.Count == 0 [{COMS.Count == 0}] || lastcoms.SequenceEqual(COMS) [{lastcoms.SequenceEqual(COMS)}]");
+            string[] ports;
+
+            while (COMS.Count == 0 || lastcoms.SequenceEqual(COMS))
+            {
+                if (canceltoken.IsCancellationRequested) break;
+
+                COMS.Clear();
+
+                ports = await (App.Current as App).ReceiverService.RefreshSerialPorts(canceltoken.Token);
+
+                COMS.AddRange(ports);
+
+                Debug.WriteLine($"COMS.Count == 0 [{COMS.Count == 0}] || lastcoms.SequenceEqual(COMS) [{lastcoms.SequenceEqual(COMS)}]");
+            }
 
             if (COMS.Count == 0)
-                COMS.Add("Tidak ada perangkat yang tersambung.");
+                COMS.AddRange(lastcoms);
 
             COM_Ports.SelectedIndex = 0;
 
@@ -98,7 +119,7 @@ namespace TugasAkhir_GCS
                 (App.Current as App).ReceiverService = new WIFIService();
             }
 
-            Debug.WriteLine("WIFI BUTTON TAPPED");
+            //Debug.WriteLine("WIFI BUTTON TAPPED");
             ConnArgs.ConnType = ConnectionType.WIFI;
 
             (sender as ImageButton).BorderWidth = 2;
@@ -144,6 +165,47 @@ namespace TugasAkhir_GCS
             IsVisible = true;
             IsEnabled = true;
             (Parent as View).IsVisible = true;
+        }
+
+        private void PanGestureRecognizer_PanUpdated(object sender, PanUpdatedEventArgs e)
+        {
+            switch (e.StatusType)
+            {
+                case GestureStatus.Started:
+                    break;
+                case GestureStatus.Running:
+                    var winwidth = (App.Current.MainPage as MainPage).Width;
+                    var winheight = (App.Current.MainPage as MainPage).Height;
+
+                    var edgex = Math.Abs(Width - (App.Current.MainPage as MainPage).Width) / 2.0;
+                    var edgey = Math.Abs(Height - (App.Current.MainPage as MainPage).Height) / 2.0;
+
+                    var transx = LastX + e.TotalX;
+                    var transy = LastY + e.TotalY;
+
+                    if (transx < -edgex) transx = -edgex;
+                    else if (transx > edgex) transx = edgex;
+
+                    if (transy < -edgey) transy = -edgey;
+                    else if (transy > edgey) transy = edgey;
+
+                    Debug.WriteLine($"edgex = {edgex}, edgey = {edgey}\r\n" +
+                        $"transx = {transx}, transy = {transy}\r\n");
+
+                    TranslationX = transx;
+                    TranslationY = transy;
+                    break;
+                case GestureStatus.Completed:
+                    LastX = TranslationX;
+                    LastY = TranslationY;
+
+                    Debug.WriteLine($"lastx = {LastX}, lasty = {LastY}");
+                    break;
+                case GestureStatus.Canceled:
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

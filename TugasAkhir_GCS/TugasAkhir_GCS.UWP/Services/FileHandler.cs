@@ -54,5 +54,10 @@ namespace TugasAkhir_GCS.UWP.Services
             Debug.WriteLine("Save File Finished");
         }
 
+        public void Write(string str)
+        {
+            if (savefile != null)
+                savefile.WriteString(str);
+        }
     }
 }

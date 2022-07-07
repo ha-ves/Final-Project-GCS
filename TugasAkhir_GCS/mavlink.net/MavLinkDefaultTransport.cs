@@ -89,12 +89,9 @@ namespace MavLinkNet
         {
             Thread.CurrentThread.Name = "ProcessReceiveQueue";
 
-            int id = 0;
-
             while (true)
             {
                 byte[] buffer;
-                DateTime packetTime;
 
                 mReceiveSignal.WaitOne();
 

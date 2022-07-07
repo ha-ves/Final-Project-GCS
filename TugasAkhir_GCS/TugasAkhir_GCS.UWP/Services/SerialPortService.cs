@@ -29,25 +29,29 @@ namespace TugasAkhir_GCS.UWP.Services
 
         CancellationTokenSource cancelserial;
 
-        public async Task<string[]> RefreshSerialPorts()
+        public async Task<string[]> RefreshSerialPorts(CancellationToken canceltoken)
         {
             SerialPorts = new Dictionary<string, DeviceInformation>();
             var ports = new List<string>();
 
-            var devices = await DeviceInformation.FindAllAsync(SerialDevice.GetDeviceSelector());
-
-            foreach (var device in devices)
+            try
             {
-                using (var serialport = await SerialDevice.FromIdAsync(device.Id))
+                var devices = await DeviceInformation.FindAllAsync(SerialDevice.GetDeviceSelector()).AsTask(canceltoken);
+
+                foreach (var device in devices)
                 {
-                    if (serialport != null)
+                    using (var serialport = await SerialDevice.FromIdAsync(device.Id).AsTask(canceltoken))
                     {
-                        SerialPorts.Add(serialport.PortName, device);
-                        ports.Add(serialport.PortName);
-                        Debug.WriteLine(WithThread.GetString($"Device found : {serialport.PortName}"));
+                        if (serialport != null)
+                        {
+                            SerialPorts.Add(serialport.PortName, device);
+                            ports.Add(serialport.PortName);
+                            //Debug.WriteLine(WithThread.GetString($"Device found : {serialport.PortName}"));
+                        }
                     }
                 }
             }
+            catch (TaskCanceledException) { }
 
             return ports.ToArray();
         }
@@ -73,7 +77,7 @@ namespace TugasAkhir_GCS.UWP.Services
             Task.Run(() => SerialRead_Entry(cancelserial.Token));
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
-            if (await (MainApp.Current as MainApp).InitializeTransport())
+            if (await (MainApp.Current as MainApp).InitSystem())
                 return true;
 
             await Disconnect();

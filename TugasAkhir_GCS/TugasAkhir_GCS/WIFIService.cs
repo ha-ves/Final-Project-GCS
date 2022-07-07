@@ -19,7 +19,7 @@ namespace TugasAkhir_GCS
     {
         public event NewDataReceived DataReceived;
 
-        SocketAsyncEventArgs asyncEvent;
+        //SocketAsyncEventArgs asyncEvent;
 
         Socket NetSocket;
         byte[] RxBuf;
@@ -52,7 +52,7 @@ namespace TugasAkhir_GCS
                 NetSocket.Send(Encoding.ASCII.GetBytes("hello"));
                 NetSocket.BeginReceive(RxBuf, 0, RxBuf.Length, SocketFlags.None, WIFIReceived, null);
 
-                if (await (App.Current as App).InitializeTransport())
+                if (await (App.Current as App).InitSystem())
                     return true;
             }
 
@@ -65,8 +65,8 @@ namespace TugasAkhir_GCS
 
         public Task<bool> Disconnect()
         {
-            if(asyncEvent != null)
-                asyncEvent.Dispose();
+            //if(asyncEvent != null)
+            //    asyncEvent.Dispose();
 
             if(NetSocket != null)
             {
@@ -129,7 +129,7 @@ namespace TugasAkhir_GCS
 
         #region not used implementations
 
-        public Task<string[]> RefreshSerialPorts()
+        public Task<string[]> RefreshSerialPorts(CancellationToken canceltoken)
         {
             return Task.FromResult(new string[0]);
         }

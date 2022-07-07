@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Accord.Fuzzy;
 using MavLinkNet;
 using TugasAkhir_GCS.Interfaces;
 using Xamarin.Essentials;
@@ -22,10 +23,6 @@ namespace TugasAkhir_GCS
 {
     public partial class MainPage : ContentPage, INotifyPropertyChanged
     {
-        /* Connection variables */
-        ConnectionArgs CurrentConnection;
-        bool IsConnected = false;
-
         /* Flight data variables */
         string _flightMode = "offline";
         public string FlightMode { get => _flightMode; set { _flightMode = value; OnPropertyChanged("FlightMode"); } }
@@ -39,13 +36,14 @@ namespace TugasAkhir_GCS
         string _flightTime = "t+00:00:00.00";
         public string FlightTime { get => _flightTime; set { _flightTime = value; OnPropertyChanged("FlightTime"); } }
 
+        /* timers n stuff */
         System.Timers.Timer FlightTimer;
         Stopwatch FlightStopwatch;
 
         /* Kestabilan terbang variables */
         List<double> LastSamples = new List<double>();
         List<double> LastSamplesTime = new List<double>();
-        const int samples = 10;
+        const int SamplesWindow = 10;
 
         /* Other variables */
         bool useCompass = true;
@@ -79,20 +77,23 @@ namespace TugasAkhir_GCS
             LoadingMessage.Text = "";
         }
 
+        public void ToggleWaktuKembali(bool bul) => MainThread.InvokeOnMainThreadAsync(() => WaktuKembali.IsVisible = bul);
+
         #endregion
 
         #region Update UI
 
         public void UpdateUI(UasMessage msg)
         {
-            //Debug.WriteLine($"New {msg}");
+#if DATA_FETCH
             TimeSpan updateui;
-
+#endif
             switch (msg)
             {
                 case UasSysStatus SysStat:
                     UpdateBatt(SysStat.BatteryRemaining);
                     UpdateSignal(SysStat.DropRateComm);
+                    //(App.Current as App).ReturnTime.ReturnTimeUpdate();
 #if DATA_FETCH
                     updateui = DateTime.Now - (App.Current as App).packettime;
 
@@ -103,9 +104,10 @@ namespace TugasAkhir_GCS
 #endif
                     break;
                 case UasGlobalPositionInt Gps:
-                    UpdateGPS(Gps.Lat, Gps.Lon);
+                    UpdateGPS(Gps.Lat, Gps.Lon, Gps.RelativeAlt);
                     UpdateBearing(Gps.Hdg);
                     Alti_Avionic.UpdateUI(Gps.RelativeAlt);
+                    (App.Current as App).ReturnTime.ReturnTimeUpdate(0,0,0);
 #if DATA_FETCH
                     updateui = DateTime.Now - (App.Current as App).packettime;
 
@@ -116,9 +118,13 @@ namespace TugasAkhir_GCS
 #endif
                     break;
                 case UasAttitude Att:
+                    double grads = 0;
                     UpdateAtt(Att.Yaw, Att.Pitch, Att.Roll);
-                    UpdateKestabilanTerbang();
+                    UpdateKestabilanTerbang(out grads);
 #if DATA_FETCH
+                    (App.Current as App).stabilfile.WriteLine($"{Att.Roll}," +
+                        $"{grads}");
+
                     updateui = DateTime.Now - (App.Current as App).packettime;
                         
                     (App.Current as App).attsavefile.WriteLine(
@@ -147,6 +153,67 @@ namespace TugasAkhir_GCS
 #endif
         }
 
+        internal void UpdateWaktuKembali(double result)
+        {
+            var slider = (((WaktuKembali.Content as StackLayout).Children.First(view => view.GetType() == typeof(Grid)) as Grid).Children.First(view => view.GetType() == typeof(Slider)) as Slider).Value;
+            
+            new Animation(start: slider, end: 10.0 - result, easing: Easing.CubicOut,
+                callback: val =>
+                    (((WaktuKembali.Content as StackLayout).Children.First(view => view.GetType() == typeof(Grid)) as Grid).Children.First(view => view.GetType() == typeof(Slider)) as Slider).Value = val)
+                .Commit(this, "SliderAnim", length: 1000);
+
+            var lumino = (Math.Log10(1 + result) / Math.Log10(11)).Map(0.0, 1.3, 0.3, 0.5);
+            var hue = 0.35 - result.Map(0.0, 10.0, 0.0, 0.45);
+
+            var warningcol = (WaktuKembali.Content as StackLayout).Children.First(view => view.GetType() == typeof(Frame)).BackgroundColor;
+
+            var nextcol = Color.Green.WithHue(hue).WithLuminosity(lumino);
+
+            AnimationExtensions.Animate(this, name: "WarningAnim", easing: Easing.CubicOut, length: 1000,
+                transform: (time) =>
+                {
+                    var R = warningcol.R + (nextcol.R - warningcol.R) * time;
+                    var G = warningcol.G + (nextcol.G - warningcol.G) * time;
+                    var B = warningcol.B + (nextcol.B - warningcol.B) * time;
+                    var A = warningcol.A + (nextcol.A - warningcol.A) * time;
+
+                    return new Color(R, G, B, A);
+                },
+                callback: (val) => (WaktuKembali.Content as StackLayout).Children.First(view => view.GetType() == typeof(Frame)).BackgroundColor = val);
+        }
+
+        internal void WaktuKembaliBlinker()
+        {
+            var oricolor = Color.FromHex("#af000000");
+            var color = (WaktuKembali.Content as StackLayout).Children.First(view => view.GetType() == typeof(Frame)).BackgroundColor;
+
+            AnimationExtensions.Animate(this, name: "BlinkAnim", easing: Easing.CubicOut, length: 500,
+                transform: (time) =>
+                {
+                    var R = oricolor.R + (color.R - oricolor.R) * time;
+                    var G = oricolor.G + (color.G - oricolor.G) * time;
+                    var B = oricolor.B + (color.B - oricolor.B) * time;
+                    var A = oricolor.A + (color.A - oricolor.A) * time;
+
+                    return new Color(R, G, B, A);
+                },
+                callback: (val) => WaktuKembali.BackgroundColor = val,
+                finished: (col, isfinish) =>
+                {
+                    AnimationExtensions.Animate(this, name: "UnblinkAnim", easing: Easing.CubicIn, length: 500,
+                        transform: (time) =>
+                        {
+                            var R = color.R + (oricolor.R - color.R) * time;
+                            var G = color.G + (oricolor.G - color.G) * time;
+                            var B = color.B + (oricolor.B - color.B) * time;
+                            var A = color.A + (oricolor.A - color.A) * time;
+
+                            return new Color(R, G, B, A);
+                        },
+                        callback: (val) => WaktuKembali.BackgroundColor = val);
+                });
+        }
+
         private void UpdateFlightMode(MavState state)
         {
 #if DATA_FETCH
@@ -159,14 +226,13 @@ namespace TugasAkhir_GCS
         private void UpdateAtt(float yawRad, float pitchRad, float rollRad)
         {
             LastSamples.Add(rollRad * 180.0 / Math.PI);
-            if(FlightStopwatch != null)
+            if (FlightStopwatch != null)
                 LastSamplesTime.Add(FlightStopwatch.Elapsed.TotalMilliseconds);
 
-            if (LastSamples.Count > samples)
-            {
+            if (LastSamples.Count > SamplesWindow)
                 LastSamples.RemoveAt(0);
-                //LastSamplesTime.RemoveAt(0);
-            }
+            if (LastSamplesTime.Count > SamplesWindow)
+                LastSamplesTime.RemoveAt(0);
 
             IMU_Avionic.UpdateUI(pitchRad, rollRad);
 
@@ -174,10 +240,21 @@ namespace TugasAkhir_GCS
                 MapView.UpdateBearing((float)(((yawRad * 180.0 / Math.PI) + 360.0) % 360));
         }
 
-        private void UpdateKestabilanTerbang()
+#if USE_FIT_LINE
+        readonly double[] window = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+#endif
+        private void UpdateKestabilanTerbang(out double grads)
         {
-            if (LastSamples.Count < samples)
+            if (LastSamples.Count < SamplesWindow || LastSamplesTime.Count < SamplesWindow)
+            {
+                grads = 0;
                 return;
+            }
+#if USE_FIT_LINE
+            var grad = MathNet.Numerics.Fit.Line(window, LastSamples.ToArray()).Item2;
+            grads = grad;
+#else
+            var fitline = MathNet.Numerics.Fit.Line(window, LastSamples.ToArray()).Item2;
 
             int sigmaX = 0;
             int sigma_XSquare = 0;
@@ -185,21 +262,23 @@ namespace TugasAkhir_GCS
             var sigmaY = LastSamples.Sum();
             var sigmaXY = 0d;
 
-            for (int i = 0; i < samples; i++)
+            for (int i = 0; i < SamplesWindow; i++)
             {
                 sigmaX += i + 1;
                 sigma_XSquare += (i + 1) * (i + 1);
                 sigmaXY += (i + 1) * LastSamples[i];
             }
 
-            var grad = ((samples * sigmaXY) - (sigmaX * sigmaY)) / ((samples * sigma_XSquare) - (sigmaX * sigmaX)) * 2;
+            var grad = ((SamplesWindow * sigmaXY) - (sigmaX * sigmaY)) / ((SamplesWindow * sigma_XSquare) - (sigmaX * sigmaX));
 
-            //Debug.WriteLine($"Kestabian : m = {grad}");
-
+            //Debug.WriteLine($"Kestabilan fit line = {fitline:0.######} | m = {grad:0.######}\r\n" +
+            //    $"diff = {fitline-grad:0.######}");
+#endif
             var m = Math.Abs(grad);
+            
             MainThread.InvokeOnMainThreadAsync(() =>
             {
-                if (m >= 10)
+                if (m >= 5)
                 {
                     Kestabilan.IsVisible = true;
                     Kestabilan.BackgroundColor = Color.Red;
@@ -218,7 +297,7 @@ namespace TugasAkhir_GCS
                     //}
                     //Debug.WriteLine("");
                 }
-                else if (5 < m && m < 10)
+                else if (1 < m && m < 5)
                 {
                     Kestabilan.IsVisible = true;
                     Kestabilan.BackgroundColor = Color.Yellow;
@@ -247,7 +326,7 @@ namespace TugasAkhir_GCS
 #endif
         }
 
-        private void UpdateGPS(int lat, int lon)
+        private void UpdateGPS(int lat, int lon, int alt)
         {
             //lat = -74107080 + new Random().Next(-200, 200);
             //lon = 1127047190 + new Random().Next(-200, 200);
@@ -255,7 +334,7 @@ namespace TugasAkhir_GCS
             if (lat == int.MinValue || lon == int.MinValue)
                 return;
 
-            MapView.UpdateGPS(lat, lon);
+            MapView.UpdateGPS(lat, lon, alt);
         }
 
         private void UpdateBearing(ushort hdg)
@@ -263,12 +342,13 @@ namespace TugasAkhir_GCS
             if (hdg == ushort.MaxValue || !useCompass)
                 return;
 
-            MapView.UpdateBearing((float)((hdg - 9000 + 36000) % 36000 / 100.0));
-            Bearing_Avionic.UpdateUI((float)(hdg / 100.0));
+            MapView.UpdateBearing((float)((hdg - 9000 + 36000) % 36000 * 0.01));
+            Bearing_Avionic.UpdateUI((float)(hdg * 0.01));
         }
 
-        private async void UpdateBatt(sbyte batteryRemaining)
+        private void UpdateBatt(sbyte batteryRemaining)
         {
+            //(App.Current as App).ReturnTime.UAVBatt = batteryRemaining;
 #if DATA_FETCH
             MainThread.BeginInvokeOnMainThread(() => batt.Text = $"batt : {batteryRemaining} %");
 #else
@@ -276,66 +356,127 @@ namespace TugasAkhir_GCS
 #endif
         }
 
-        private async void UpdateSignal(ushort dropRateComm)
+        private void UpdateSignal(ushort dropRateComm)
         {
 #if DATA_FETCH
             MainThread.BeginInvokeOnMainThread(() => sig.Text = $"rssi : {100.0 - (dropRateComm / 100.0):0.00} %");
 #else
-            SignalPercent = $"rssi : {100.0 - (dropRateComm / 100.0):0.00} %";
+            SignalPercent = $"rssi : {100.0 - (dropRateComm * 0.01):0.00} %";
 #endif
         }
 
-#endregion
+        #endregion
 
-#region Button events
+        #region Button events
 
+        private async void Button_Clicked_3(object sender, EventArgs e)
+        {
+            ShowLoadingOverlay("Doing randomize FIS return time");
+
+            await Task.Run(() =>
+            {
+                (App.Current as App).ReturnTime = new ReturnTimeService();
+
+                Debug.WriteLine("Start return time randomizer (BATT, ALT, OUTPUT)");
+
+                (App.Current as App).returnfile.Write(",");
+
+                var samples = 100;
+
+                // column BATT
+                for (int i = 0; i <= samples; i++)
+                {
+                    decimal col = ((decimal)(100.0 * i / samples));
+                    if (col % 1 == 0)
+                        (App.Current as App).returnfile.Write(col.ToString() + ',');
+                    else
+                        (App.Current as App).returnfile.Write(",");
+                }
+                (App.Current as App).returnfile.WriteLine(",");
+
+                // for each rows ALT
+                for (int i = 0; i <= samples; i++)
+                {
+                    decimal row = ((decimal)(400.0 * i / samples));
+                    if (row % 1 == 0)
+                        (App.Current as App).returnfile.Write(row.ToString() + ',');
+                    else
+                        (App.Current as App).returnfile.Write(",");
+
+                    // for each column BATT
+                    for (int j = 0; j <= samples; j++)
+                    {
+                        var res = (App.Current as App).ReturnTime.ReturnTimeUpdate(100.0 * j / samples, 2.5, 400.0 * i / samples);
+                        (App.Current as App).returnfile.Write(res.ToString() + ',');
+                    }
+
+                    (App.Current as App).returnfile.WriteLine("");
+                }
+
+                Debug.WriteLine("End return time randomizer");
+
+                (App.Current as App).FinishDataFetch();
+            });
+
+            HideLoadingOverlay();
+        }
+
+        private void Button_Clicked_2(object sender, EventArgs e)
+        {
+            (App.Current as App).ErrorMavlink = true;
+        }
 
         private void Collapsible_Clicked(object sender, EventArgs e)
         {
             var lbl = sender as Label;
-            var stack = (lbl.Parent as StackLayout).Children.First(view => view.GetType() == typeof(StackLayout));
-            if (stack.IsVisible)
+            var avionics = (lbl.Parent as StackLayout).Children.First(view => view.GetType() == typeof(StackLayout));
+            var botpanel = (lbl.Parent.Parent.Parent as VisualElement);
+            var botpaneltransy = App.Current.Resources["BotPanelCollapsedTransY"] as OnIdiom<short>;
+
+            if (avionics.IsVisible)
             {
-                stack.IsVisible = false;
-                lbl.Text = "Click to expand ▲";
+                new Animation(start: 0, end: botpaneltransy, callback: val => botpanel.TranslationY = val)
+                    .Commit(this, "CollapseAnim", length: App.Current.Resources["AnimLength"] as OnIdiom<byte>,
+                    finished: (val, isfinish) =>
+                    {
+                        avionics.IsVisible = false;
+                        lbl.Text = "Click to expand ▲";
+                        botpanel.TranslationY = 0;
+                    });
             }
             else
             {
-                stack.IsVisible = true;
-                lbl.Text = "Click to collapse ▼";
+                avionics.IsVisible = true;
+                botpanel.TranslationY = (double)botpaneltransy;
+
+                new Animation(start: botpaneltransy, end: 0, callback: val => botpanel.TranslationY = val)
+                    .Commit(this, "ExpandAnim", length: App.Current.Resources["AnimLength"] as OnIdiom<byte>,
+                    finished: (val, isfinish) => lbl.Text = "Click to collapse ▼");
             }
         }
 
         private void ConnSettings_Confirmed(object sender, ConnectionArgs ConnArgs)
         {
-            CurrentConnection = ConnArgs;
-            ConnectBtn.IsEnabled = true;
-            ConnectBtn.BackgroundColor = Color.Red;
+            (App.Current as App).CurrentConnection = ConnArgs;
+            ((View)ConnectBtn).IsEnabled = true;
+            ((View)ConnectBtn).BackgroundColor = Color.Red;
         }
 
         private void Toggle_ConnSettings(object sender, EventArgs e)
         {
             if (!ConnSettings.IsVisible)
-            {
                 ConnSettings.ShowPanel();
-                ConnectBtn.IsEnabled = false;
-                ConnectBtn.BackgroundColor = Color.DarkSlateGray;
-            }
             else
-            {
                 ConnSettings.ClosePanel();
-                ConnectBtn.IsEnabled = true;
-                ConnectBtn.BackgroundColor = Color.Red;
-            }
         }
 
         private async void Connection_Clicked(object sender, EventArgs e)
         {
-            if (!IsConnected)
+            if (!(App.Current as App).IsConnected)
             {
                 var valid = false;
 
-                ConnSettingBtn.IsEnabled = false;
+                ((View)ConnSettingBtn).IsEnabled = false;
                 
                 (sender as Button).Text = "Connecting";
                 (sender as Button).IsEnabled = false;
@@ -343,12 +484,12 @@ namespace TugasAkhir_GCS
 
                 ShowLoadingOverlay("Menyambungkan UAV . . .");
 
-                switch (CurrentConnection.ConnType)
+                switch ((App.Current as App).CurrentConnection.ConnType)
                 {
                     case ConnectionType.USB:
                         
 
-                        var COM = CurrentConnection.Config["COM"] as string;
+                        var COM = (App.Current as App).CurrentConnection.Config["COM"] as string;
                         if (!COM.Contains("COM"))
                         {
                             if (!await DisplayAlert("COM Port tidak valid :", COM, "OK", "Ubah"))
@@ -358,18 +499,18 @@ namespace TugasAkhir_GCS
 
                         valid = true;
 
-                        if (!await Task.Run(() => (App.Current as App).ReceiverService.ConnectTo(COM, CurrentConnection.Config["Baudrate"] as string)))
+                        if (!await Task.Run(() => (App.Current as App).ReceiverService.ConnectTo(COM, (App.Current as App).CurrentConnection.Config["Baudrate"] as string)))
                             break;
 
-                        IsConnected = true;
+                        (App.Current as App).IsConnected = true;
                         
                         break;
                     case ConnectionType.WIFI:
                         if (await Permissions.RequestAsync<Permissions.NetworkState>() != PermissionStatus.Granted)
                             return;
 
-                        var IP = CurrentConnection.Config["IP"] as string;
-                        var Port = CurrentConnection.Config["Port"] as string;
+                        var IP = (App.Current as App).CurrentConnection.Config["IP"] as string;
+                        var Port = (App.Current as App).CurrentConnection.Config["Port"] as string;
                         ushort PortNum = 0;
 
                         if (IP.Count(dot => dot == '.') < 3)
@@ -390,18 +531,18 @@ namespace TugasAkhir_GCS
                         if (!await Task.Run(() => ((App.Current as App).ReceiverService as WIFIService).ConnectTo(IP, PortNum)))
                             break;
 
-                        IsConnected = true;
+                        (App.Current as App).IsConnected = true;
                         
                         break;
                     default:
                         break;
                 }
 
-                if (IsConnected)
+                if ((App.Current as App).IsConnected)
                 {
                     StartFlightTimer();
 
-                    (sender as Button).Text = "Connected";
+                    (sender as Button).Text = "tap to disconnect";
                     (sender as Button).BackgroundColor = Color.Green;
                 }
                 else
@@ -409,10 +550,10 @@ namespace TugasAkhir_GCS
                     if(valid)
                         await DisplayAlert("Gagal terhubung ke UAV", "UAV tidak ditemukan.", "OK");
 
-                    (sender as Button).Text = "Disconnected";
+                    (sender as Button).Text = "tap to connect";
                     (sender as Button).BackgroundColor = Color.Red;
 
-                    ConnSettingBtn.IsEnabled = true;
+                    ((View)ConnSettingBtn).IsEnabled = true;
                 }
                 (sender as Button).IsEnabled = true;
             }
@@ -434,21 +575,22 @@ namespace TugasAkhir_GCS
                 if ((App.Current as App).MavLinkTransport != null)
                     (App.Current as App).MavLinkTransport.Dispose();
 
-                IsConnected = false;
+                (App.Current as App).IsConnected = false;
 
-                if (IsConnected)
+                if ((App.Current as App).IsConnected)
                 {
-                    (sender as Button).Text = "Connected";
+                    (sender as Button).Text = "tap to disconnect";
                     (sender as Button).BackgroundColor = Color.Green;
                 }
                 else
                 {
                     StopFlightTimer();
+                    (App.Current as App).ReturnTime.Dispose();
 
-                    (sender as Button).Text = "Disconnected";
+                    (sender as Button).Text = "tap to connect";
                     (sender as Button).BackgroundColor = Color.Red;
 
-                    ConnSettingBtn.IsEnabled = true;
+                    ((View)ConnSettingBtn).IsEnabled = true;
                 }
                 (sender as Button).IsEnabled = true;
             }
@@ -461,7 +603,7 @@ namespace TugasAkhir_GCS
             FlightStopwatch = Stopwatch.StartNew();
 
             FlightTimer = new System.Timers.Timer(1 / 30.0);
-            FlightTimer.Elapsed += async (object sender, System.Timers.ElapsedEventArgs e) =>
+            FlightTimer.Elapsed += (sender, e) =>
             {
                 FlightTime = "t+" + FlightStopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.ff");
             };
@@ -481,19 +623,30 @@ namespace TugasAkhir_GCS
             }
         }
 
-#endregion
+        #endregion
 
-#region Demo
+        #region Demo
 
-#region Demo AES
+        #region Demo AES
 
 
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
 
-#region AES Testing
+        #region FIS Test Area
+
+        double _returntime = 0;
+        public double ReturnTime { get => _returntime; set { _returntime = value; OnPropertyChanged("ReturnTime"); UpdateWaktuKembali(value); } }
+
+        public sbyte GetBattMod() => (sbyte)BattMod.Value;
+        public int GetJarakMod() => (int)JarakMod.Value;
+        public int GetTinggiMod() => (int)TinggiMod.Value;
+
+        #endregion
+
+        #region AES Testing
 
         private async void Button_Clicked(object sender, EventArgs e)
         {
@@ -503,19 +656,19 @@ namespace TugasAkhir_GCS
             {
                 Thread.CurrentThread.Name = "AES Test Thread";
 
-                (App.Current as App).InitializeAES();
+                (App.Current as App).InitAES();
 
                 var timer = Stopwatch.StartNew();
 
                 for (int i = 0; i < 1000000; i++)
                 {
-                    (App.Current as App).EncryptAndGetCipherBytes((App.Current as App).DummyBuf.ToArray());
+                    (App.Current as App).EncryptAndGetCipherBytes(Variables.DummyBuf.ToArray());
                 }
 
                 timer.Stop();
                 Debug.WriteLine($"1 mil Encryption took {timer.ElapsedMilliseconds} ms / {timer.ElapsedTicks} ticks");
 
-                var dummyCipher = (App.Current as App).EncryptAndGetCipherBytes((App.Current as App).DummyBuf.ToArray());
+                var dummyCipher = (App.Current as App).EncryptAndGetCipherBytes(Variables.DummyBuf.ToArray());
 
                 timer = Stopwatch.StartNew();
 
@@ -540,9 +693,9 @@ namespace TugasAkhir_GCS
             HideLoadingOverlay();
         }
 
-#endregion
+        #endregion
 
-#region MavLink Dump
+        #region MavLink Dump
 
         private async void Button_Clicked_1(object sender, EventArgs e)
         {
@@ -633,9 +786,9 @@ namespace TugasAkhir_GCS
             HideLoadingOverlay();
         }
 
-#endregion
+        #endregion
 
-#region Dummy Update UI
+        #region Dummy Update UI
 
         System.Timers.Timer test = new System.Timers.Timer(1000);
         bool Stopped = true;
@@ -680,17 +833,13 @@ namespace TugasAkhir_GCS
                 UpdateAtt((float)(y * Math.PI / 180.0), (float)(p * Math.PI / 180.0), (float)(r * Math.PI / 180.0));
                 //UpdateKestabilanTerbang();
 
-                UpdateGPS(lat, lon);
+                UpdateGPS(lat, lon, 0);
 
                 UpdateBatt(batt);
             });
         }
 
-#endregion
+        #endregion
 
-        private void Button_Clicked_2(object sender, EventArgs e)
-        {
-            (App.Current as App).ErrorMavlink = true;
-        }
     }
 }
