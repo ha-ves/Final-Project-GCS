@@ -40,7 +40,7 @@ namespace TugasAkhir_GCS
             mapView.Map.Layers.Add(new TileLayer(
                 tileSource: KnownTileSources.Create(
                     KnownTileSource.BingAerial,
-                    Variables.BING_MAPS_API_KEY,
+                    Variables.BingMapsAPIKey,
                     new FileCache(
                         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
                         + @"\MapCache\", "mdat")

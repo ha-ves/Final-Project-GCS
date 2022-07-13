@@ -6,7 +6,7 @@ namespace TugasAkhir_GCS
 {
     public class Variables
     {
-        public const string BING_MAPS_API_KEY = "BRRmmDJXeAGpWegvrwR2~3a5atSGXNkwaG8hkfASdtA~AtSc-tpKsW1ZYz5EdTReaV25tffE0sguBQHOR76pUJ5nXSzpBZ14Y5Z3Bm7HgRcO";
+        public const string BingMapsAPIKey = "BRRmmDJXeAGpWegvrwR2~3a5atSGXNkwaG8hkfASdtA~AtSc-tpKsW1ZYz5EdTReaV25tffE0sguBQHOR76pUJ5nXSzpBZ14Y5Z3Bm7HgRcO";
 
         // dummy mavlink 2.0 attitude msg
         public static List<byte> DummyBuf = new List<byte>()

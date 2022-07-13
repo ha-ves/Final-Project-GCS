@@ -27,13 +27,13 @@ namespace TugasAkhir_GCS
         string _flightMode = "offline";
         public string FlightMode { get => _flightMode; set { _flightMode = value; OnPropertyChanged("FlightMode"); } }
 
-        string _battPercent = "batt : n/a %";
+        string _battPercent = "baterai : n/a %";
         public string BattPercent { get => _battPercent; set { _battPercent = value; OnPropertyChanged("BattPercent"); } }
 
-        string _signalPercent = "rssi : n/a %";
+        string _signalPercent = "sinyal : n/a %";
         public string SignalPercent { get => _signalPercent; set { _signalPercent = value; OnPropertyChanged("SignalPercent"); } }
 
-        string _flightTime = "t+00:00:00.00";
+        string _flightTime = "waktu terbang : t+00:00:00.00";
         public string FlightTime { get => _flightTime; set { _flightTime = value; OnPropertyChanged("FlightTime"); } }
 
         /* timers n stuff */
@@ -46,7 +46,7 @@ namespace TugasAkhir_GCS
         const int SamplesWindow = 10;
 
         /* Other variables */
-        bool useCompass = true;
+        bool useCompass = false;
 
         public MainPage()
         {
@@ -107,7 +107,7 @@ namespace TugasAkhir_GCS
                     UpdateGPS(Gps.Lat, Gps.Lon, Gps.RelativeAlt);
                     UpdateBearing(Gps.Hdg);
                     Alti_Avionic.UpdateUI(Gps.RelativeAlt);
-                    (App.Current as App).ReturnTime.ReturnTimeUpdate(0,0,0);
+                    (App.Current as App).ReturnTime.ReturnTimeUpdate();
 #if DATA_FETCH
                     updateui = DateTime.Now - (App.Current as App).packettime;
 
@@ -406,7 +406,7 @@ namespace TugasAkhir_GCS
                     // for each column BATT
                     for (int j = 0; j <= samples; j++)
                     {
-                        var res = (App.Current as App).ReturnTime.ReturnTimeUpdate(100.0 * j / samples, 2.5, 400.0 * i / samples);
+                        var res = (App.Current as App).ReturnTime.ReturnTimeUpdate(/*100.0 * j / samples, 2.5, 400.0 * i / samples*/);
                         (App.Current as App).returnfile.Write(res.ToString() + ',');
                     }
 
@@ -440,7 +440,7 @@ namespace TugasAkhir_GCS
                     finished: (val, isfinish) =>
                     {
                         avionics.IsVisible = false;
-                        lbl.Text = "Click to expand ▲";
+                        lbl.Text = "Tekan to membuka ▲";
                         botpanel.TranslationY = 0;
                     });
             }
@@ -451,7 +451,7 @@ namespace TugasAkhir_GCS
 
                 new Animation(start: botpaneltransy, end: 0, callback: val => botpanel.TranslationY = val)
                     .Commit(this, "ExpandAnim", length: App.Current.Resources["AnimLength"] as OnIdiom<byte>,
-                    finished: (val, isfinish) => lbl.Text = "Click to collapse ▼");
+                    finished: (val, isfinish) => lbl.Text = "Tekan to menutup ▼");
             }
         }
 
@@ -605,7 +605,7 @@ namespace TugasAkhir_GCS
             FlightTimer = new System.Timers.Timer(1 / 30.0);
             FlightTimer.Elapsed += (sender, e) =>
             {
-                FlightTime = "t+" + FlightStopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.ff");
+                FlightTime = "waktu terbang : t+" + FlightStopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.ff");
             };
             FlightTimer.Start();
         }

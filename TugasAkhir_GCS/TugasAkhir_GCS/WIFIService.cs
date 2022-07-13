@@ -104,23 +104,23 @@ namespace TugasAkhir_GCS
             
             NetSocket.BeginReceive(RxBuf, 0, RxBuf.Length, SocketFlags.None, WIFIReceived, null);
 
-            //if ((App.Current as App).consolemutex.WaitOne(0))
-            //{
-            //    Debug.WriteLine($"New WIFI Data (encrypted) -> {bytes} bytes");
-            //    int count = 0;
-            //    for (int i = 0; i < bytes; i++)
-            //    {
-            //        Debug.Write($"{RxBuf[i]:X2}");
-            //        if (++count > 15)
-            //        {
-            //            Debug.WriteLine("");
-            //            count = 0;
-            //        }
-            //    }
-            //    Debug.WriteLine("");
+            if ((App.Current as App).consolemutex.WaitOne(0))
+            {
+                Debug.WriteLine($"New WIFI Data (encrypted) -> {bytes} bytes");
+                int count = 0;
+                for (int i = 0; i < bytes; i++)
+                {
+                    Debug.Write($"0x{RxBuf[i]:X2} ");
+                    if (++count > 15)
+                    {
+                        Debug.WriteLine("");
+                        count = 0;
+                    }
+                }
+                Debug.WriteLine("");
 
-            //    (App.Current as App).consolemutex.ReleaseMutex();
-            //}
+                (App.Current as App).consolemutex.ReleaseMutex();
+            }
 
             if (DataReceived != null) Task.Run(() => DataReceived(this, RxBuf.Take(bytes).ToArray(), receiveTime));
         }

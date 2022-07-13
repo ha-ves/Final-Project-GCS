@@ -40,10 +40,10 @@ namespace TugasAkhir_GCS
             ((App.Current as App).MainPage as MainPage).ToggleWaktuKembali(true);
         }
 
-        public double ReturnTimeUpdate(double batt, double km, double alt)
+        public double ReturnTimeUpdate(/*double batt, double km, double alt*/)
         {
             //if (UAV == null || Home == null)
-            //    return;
+            //    return 0;
 
             BattPercent = new LinguisticVariable("BattPercent");
             var kritikal = BattPercent.MembershipFunctions.AddZShaped("kritikal", 6.25, 3.125, 0, 12.5);
@@ -97,9 +97,11 @@ namespace TugasAkhir_GCS
             Engine = new FuzzyEngineFactory().Default();
             Engine.Rules.Add(rules);
 
-            //var batt = /*UAVBatt + */((App.Current as App).MainPage as MainPage).GetBattMod();
-            //var m = (GetJaraknya(UAV.Lat, UAV.Lon, Home.Lat, Home.Lon) + ((App.Current as App).MainPage as MainPage).GetJarakMod()) * 0.001;
+            var batt = /*UAVBatt + */((App.Current as App).MainPage as MainPage).GetBattMod();
+            //var km = (GetJaraknya(UAV.Lat, UAV.Lon, Home.Lat, Home.Lon) + ((App.Current as App).MainPage as MainPage).GetJarakMod()) * 0.001;
+            var km = ((App.Current as App).MainPage as MainPage).GetJarakMod() * 0.001;
             //var alt = (Math.Abs(UAV.RelativeAlt - Home.RelativeAlt) / 304.8) + ((App.Current as App).MainPage as MainPage).GetTinggiMod();
+            var alt = ((App.Current as App).MainPage as MainPage).GetTinggiMod();
 
             var res = Engine.Defuzzify(new
             {
@@ -108,10 +110,6 @@ namespace TugasAkhir_GCS
                 Ketinggian = alt
             });
 
-            return res;
-#if DATA_FETCH
-            
-#endif
             var adj = res.Map(1.3, 8.5, 0, 10);
 
             //Debug.WriteLine($"FIS:" +
@@ -121,11 +119,14 @@ namespace TugasAkhir_GCS
             //    $"res = {res} | " +
             //    $"adj = {adj}");
 
-            //ReturnTimeInterval = (int)(15000 - (Math.Log10(1 + adj) / Math.Log10(11) * 14000));
+            ReturnTimeInterval = (int)(15000 - (Math.Log10(1 + adj) / Math.Log10(11) * 14000));
+            //ReturnTimeInterval = 500;
 
             //Debug.WriteLine($"blinker = {ReturnTimeInterval} ms");
 
-            //((App.Current as App).MainPage as MainPage).UpdateWaktuKembali(adj);
+            ((App.Current as App).MainPage as MainPage).UpdateWaktuKembali(adj);
+
+            return res;
         }
 
         private double GetJaraknya(int UAVlat, int UAVlon, int Homelat, int Homelon)

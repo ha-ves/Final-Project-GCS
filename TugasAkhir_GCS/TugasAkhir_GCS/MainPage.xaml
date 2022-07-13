@@ -9,30 +9,46 @@
         <StackLayout>
             <Frame BackgroundColor="#FFFFFF" CornerRadius="16" Margin="{StaticResource Key=TopBar_Margin}" Padding="0,4" VerticalOptions="Start">
                 <Frame BackgroundColor="#00879D" CornerRadius="16" Padding="0" Margin="0">
-                    <Grid Margin="0,28,0,0" Padding="2" ColumnDefinitions="*,3*,30,3*,2*,2*,2*">
-                        <Label Grid.Column="0" Text="TA GCS" TextColor="White" FontFamily="Bebas" FontSize="Title" CharacterSpacing="1" HorizontalTextAlignment="Center" HorizontalOptions="Center" VerticalOptions="Center"/>
-                        <Frame Grid.Column="3" BackgroundColor="Transparent" BorderColor="White" Padding="0" HorizontalOptions="FillAndExpand">
+                    <Frame.HeightRequest>
+                        <OnPlatform x:TypeArguments="x:Double">
+                            <On Platform="Android">80</On>
+                            <On Platform="UWP">60</On>
+                        </OnPlatform>
+                    </Frame.HeightRequest>
+                    <Grid Margin="0,28,0,0" Padding="2">
+                        <Grid.ColumnDefinitions><!--ColumnDefinitions="*,3*,30,3*,2*,2*,2*"-->
+                            <ColumnDefinition Width="1.2*" />
+                            <ColumnDefinition Width="2.5*" />
+                            <ColumnDefinition Width="30" />
+                            <!--<ColumnDefinition Width="3*" />-->
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition Width="1.5*" />
+                            <ColumnDefinition Width="1.5*" />
+                        </Grid.ColumnDefinitions>
+                        <Image Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.logo.png}" HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFill"/>
+                        <!--<Label Grid.Column="0" Text="TA GCS" TextColor="White" FontFamily="Bebas" FontSize="Title" CharacterSpacing="1" HorizontalTextAlignment="Center" HorizontalOptions="Center" VerticalOptions="Center"/>-->
+                        <Frame Grid.Column="3" BackgroundColor="Transparent" BorderColor="White" Padding="0" HorizontalOptions="FillAndExpand" IsVisible="false">
                             <Label x:Name="fmode" Text="{Binding FlightMode}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="Center" VerticalOptions="Center"/>
                         </Frame>
-                        <Label x:Name="ftime" Grid.Column="4" Text="{Binding FlightTime}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
-                        <Label x:Name="sig" Grid.Column="5" Text="{Binding SignalPercent}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
-                        <Label x:Name="batt" Grid.Column="6" Text="{Binding BattPercent}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                        <Label x:Name="ftime" Grid.Column="3" Text="{Binding FlightTime}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                        <Label x:Name="sig" Grid.Column="4" Text="{Binding SignalPercent}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
+                        <Label x:Name="batt" Grid.Column="5" Text="{Binding BattPercent}" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"/>
 
-                        <OnPlatform x:TypeArguments="View" x:Name="ConnectBtn">
-                            <On Platform="Default">
+                        <!--<OnPlatform x:TypeArguments="View" x:Name="ConnectBtn">
+                            <On Platform="Android">
                                 <Frame Grid.Column="1" BackgroundColor="DarkSlateGray" Padding="0" CornerRadius="4" IsEnabled="False">
                                     <Frame.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="Connection_Clicked"/>
                                     </Frame.GestureRecognizers>
-                                    <Label Text="tap to connect" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" VerticalOptions="Center" HorizontalOptions="Center"/>
+                                    <Label Text="tekan untuk koneksi" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" VerticalOptions="Center" HorizontalOptions="Center"/>
                                 </Frame>
                             </On>
-                            <On Platform="UWP">
-                                <Button Grid.Column="1" BackgroundColor="DarkSlateGray" Text="tap to connect" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" Clicked="Connection_Clicked" CornerRadius="4" IsEnabled="False"/>
-                            </On>
-                        </OnPlatform>
-                        <OnPlatform x:TypeArguments="View" x:Name="ConnSettingBtn">
-                            <On Platform="Default">
+                            <On Platform="UWP">-->
+                                <Button x:Name="ConnectBtn" Grid.Column="1" IsEnabled="false" BackgroundColor="DarkSlateGray" Text="tekan untuk koneksi" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" Clicked="Connection_Clicked" CornerRadius="4"/>
+                            <!--</On>-->
+                        <!--</OnPlatform>-->
+                        <!--<OnPlatform x:TypeArguments="View" x:Name="ConnSettingBtn">
+                            <On Platform="Android">
                                 <Frame Grid.Column="2" BackgroundColor="DarkSlateBlue" Padding="2" CornerRadius="4">
                                     <Frame.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="Toggle_ConnSettings"/>
@@ -40,10 +56,10 @@
                                     <Image Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.settings.png}" Aspect="AspectFit" HeightRequest="30"/>
                                 </Frame>
                             </On>
-                            <On Platform="UWP">
-                                <ImageButton Grid.Column="2" Clicked="Toggle_ConnSettings" BackgroundColor="DarkSlateBlue" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.settings.png}" Aspect="AspectFit" CornerRadius="4" Padding="2" HeightRequest="30"/>
-                            </On>
-                        </OnPlatform>
+                            <On Platform="UWP">-->
+                                <ImageButton x:Name="ConnSettingBtn" Grid.Column="2" Clicked="Toggle_ConnSettings" BackgroundColor="DarkSlateBlue" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.settings.png}" Aspect="AspectFit" CornerRadius="4" Padding="2" HeightRequest="30"/>
+                            <!--</On>-->
+                        <!--</OnPlatform>-->
                     </Grid>
                 </Frame>
             </Frame>
@@ -51,7 +67,7 @@
             <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Margin="0" Padding="0,-5,0,0">
                 <local:MapView x:Name="MapView"/>
                 <StackLayout HorizontalOptions="Center" VerticalOptions="Start">
-                    <Frame x:Name="WaktuKembali" Padding="5" IsVisible="False" BorderColor="White" BackgroundColor="#af000000">
+                    <Frame x:Name="WaktuKembali" Padding="5" IsVisible="false" BorderColor="White" BackgroundColor="#af000000">
                         <StackLayout Orientation="Horizontal">
                             <Label Text="WAKTU KEMBALI:" WidthRequest="80" VerticalOptions="Center" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
                             <Grid>
@@ -70,7 +86,7 @@
                     </Frame>
                     <Frame HorizontalOptions="Center" Padding="5" BackgroundColor="White">
                         <StackLayout Orientation="Vertical">
-                            <Label Text="Click to collapse ▼" HorizontalOptions="Center" TextColor="Black">
+                            <Label Text="Tekan to menutup ▼" HorizontalOptions="Center" TextColor="Black" IsVisible="false">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="Collapsible_Clicked"/>
                                 </Label.GestureRecognizers>
@@ -87,8 +103,8 @@
                 </StackLayout>
 
                 <!--testing stuff-->
-                <StackLayout VerticalOptions="Start" HorizontalOptions="Start" WidthRequest="300">
-                    <FlexLayout Wrap="Wrap">
+                <StackLayout VerticalOptions="Start" HorizontalOptions="Start" WidthRequest="300" IsVisible="true">
+                    <FlexLayout Wrap="Wrap" IsVisible="false">
                         <Button Text="Demo Visualisasi" TextColor="Black" BackgroundColor="CornflowerBlue" Clicked="DemoVisualisasi" VerticalOptions="Start" HorizontalOptions="Start"/>
                         <Button Text="Demo AES" TextColor="Black" BackgroundColor="Yellow" Clicked="Button_Clicked" VerticalOptions="Start" HorizontalOptions="Start"/>
                         <Button Text="Dump MAVLink AES" TextColor="Black" BackgroundColor="Yellow" Clicked="Button_Clicked_1" VerticalOptions="Start" HorizontalOptions="Start"/>
@@ -103,14 +119,14 @@
                             <Label Text="Batt Modifier (%)" VerticalOptions="Center" BackgroundColor="Beige" TextColor="Black" FontSize="Micro"/>
                             <StackLayout Orientation="Horizontal">
                                 <Entry Text="{Binding Source={x:Reference BattMod}, Path=Value}" WidthRequest="100"/>
-                                <Slider x:Name="BattMod" WidthRequest="200" Minimum="0" Maximum="100"/>
+                                <Slider x:Name="BattMod" WidthRequest="200" Minimum="0" Maximum="100" Value="100"/>
                             </StackLayout>
                         </StackLayout>
                         <StackLayout>
                             <Label Text="Jarak Modifier (meter)" VerticalOptions="Center" BackgroundColor="Beige" TextColor="Black" FontSize="Micro"/>
                             <StackLayout Orientation="Horizontal">
                                 <Entry Text="{Binding Source={x:Reference JarakMod}, Path=Value}" WidthRequest="100"/>
-                                <Slider x:Name="JarakMod" WidthRequest="200" Minimum="0" Maximum="10000"/>
+                                <Slider x:Name="JarakMod" WidthRequest="200" Minimum="0" Maximum="5000"/>
                             </StackLayout>
                         </StackLayout>
                         <StackLayout>
@@ -120,7 +136,7 @@
                                 <Slider x:Name="TinggiMod" WidthRequest="200" Minimum="0" Maximum="400" />
                             </StackLayout>
                         </StackLayout>
-                        <StackLayout>
+                        <StackLayout IsVisible="false">
                             <Label Text="Waktu Kembali Modifier (0 - 10.0)" VerticalOptions="Center" BackgroundColor="Beige" TextColor="Black" FontSize="Micro"/>
                             <StackLayout Orientation="Horizontal">
                                 <Entry Text="{Binding ReturnTime}" WidthRequest="100"/>

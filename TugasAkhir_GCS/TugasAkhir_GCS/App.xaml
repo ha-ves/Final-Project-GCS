@@ -6,22 +6,22 @@
         <OnIdiom x:Key="AnimLength" x:TypeArguments="x:Byte" Default="50"/>
 
         <OnIdiom x:Key="IMU_Dial_Radius" x:TypeArguments="x:Single"
-                 Desktop="120"
-                 Tablet="90"
-                 Phone="45"/>
+                 Desktop="110"
+                 Tablet="80"
+                 Phone="35"/>
         <OnIdiom x:Key="AUX_Dial_Radius" x:TypeArguments="x:Single"
-                 Desktop="60"
-                 Tablet="45"
-                 Phone="22.5"/>
+                 Desktop="55"
+                 Tablet="40"
+                 Phone="17.5"/>
 
         <OnIdiom x:Key="IMU_Dial" x:TypeArguments="x:Double"
-                 Desktop="240"
-                 Tablet="180"
-                 Phone="90"/>
+                 Desktop="230"
+                 Tablet="170"
+                 Phone="80"/>
         <OnIdiom x:Key="AUX_Dial" x:TypeArguments="x:Double"
-                 Desktop="120"
-                 Tablet="90"
-                 Phone="45"/>
+                 Desktop="115"
+                 Tablet="85"
+                 Phone="40"/>
 
         <OnIdiom x:Key="BotPanelCollapsedTransY" x:TypeArguments="x:Int16"
                  Desktop="260"

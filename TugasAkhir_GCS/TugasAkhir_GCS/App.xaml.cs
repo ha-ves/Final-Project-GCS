@@ -53,12 +53,11 @@ namespace TugasAkhir_GCS
             (MainPage as MainPage).HideLoadingOverlay();
 
             DeviceDisplay.KeepScreenOn = true;
-
+#if DATA_FETCH
             var time = DateTime.Now.ToString("yyyy-MM-dd_ss-mm-HH");
 
             returnfile = DependencyService.Get<IFileHandler>(DependencyFetchTarget.NewInstance);
             returnfile.Initialize($"ReturnTime_{time}.csv");
-#if DATA_FETCH
             stabilfile = DependencyService.Get<IFileHandler>(DependencyFetchTarget.NewInstance);
             stabilfile.Initialize($"Kestabilan_{time}.csv");
             attsavefile = DependencyService.Get<IFileHandler>(DependencyFetchTarget.NewInstance);

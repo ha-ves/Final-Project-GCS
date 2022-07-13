@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TugasAkhir_GCS.Droid.Services;
 using TugasAkhir_GCS.Interfaces;
@@ -34,7 +35,7 @@ namespace TugasAkhir_GCS.Droid.Services
             usbManager = (UsbManager)Android.App.Application.Context.GetSystemService(Context.UsbService);
         }
 
-        public Task<string[]> RefreshSerialPorts()
+        public Task<string[]> RefreshSerialPorts(CancellationToken cancelToken)
         {
             if (SerialPorts == null)
                 SerialPorts = new Dictionary<string, IUsbSerialPort>();
