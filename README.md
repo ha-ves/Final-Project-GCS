@@ -1,0 +1,13 @@
+# Android and Desktop Based Ground Control Station (GCS) Interface Design for Unmanned Aerial Vehicle (UAV) Communication and Monitoring
+
+Hafizh Irfansyah Putra  
+Department of Informatics and Computer Engineering  
+Politeknik Elektronika Negeri Surabaya (PENS) / Electronics Engineering Polytechnic Institute of Surabaya (EEPIS)  
+Surabaya, Indonesia  
+https://orcid.org/0000-0002-7008-0646  
+
+## Abstract
+The Indonesian Flying Robot Contest (KRTI) is a competition organized by the National Achievement Center of the Indonesian Ministry of Education, Culture, Research and Technology. One of the KRTI categories, Technology Development, competes with the work of Unmanned Aerial Vehicle (UAV) technology in the field of Ground Control Station (GCS). GCS serves to communicate and monitor the condition of the UAV in the air. Generally, GCS is only available in applications designed specifically for certain brands of UAVs, resulting in GCS not being able to be used for other types of UAVs. GCS communication systems with UAVs are sensitive and need to be secured from third-party tampering. UAVs can experience wind disturbances as well as urgency due to depleted battery capacity. Based on the problems that have been outlined, in this final project, a solution was created to design the interface of the GCS application for communication and monitoring of Android and Windows-based UAVs. The built GCS provides an alternative communication medium with Radio Telemetry for long-distance coverage and Wi-Fi for short-range coverage. The GCS communication system with the UAV is secured using the AES algorithm encryption. The constructed GCS analyzes the roll value movement of the IMU sensor with the linear regression method to inform the UAV stability condition and analyze the data of GPS sensors, altitude sensors, and UAV battery capacity sensors with the fuzzy inference system method to inform the urgency of the UAV return time. GCS meets real-time needs running on the lowest versions of Windows 10 and Android 5.0 (Lollipop) with an average data runtime of 3,427 milliseconds for Windows and 16,724 milliseconds for Android. The usability of the GCS design is rated Excellent with a 00% effectiveness rate. Round-Trip-Time USB UART communication media of 13,518 milliseconds at a test limit distance of 100 meters and Wi-Fi UDP Relay of 3,125 milliseconds at an optimal distance of 25 meters. GCS communication systems with UAVs are secure against Man-in-The-Middle and Brute Force attacks with a key-breaking time of more than 784 billion years.
+
+## UAV Information
+_**UAV Specifications is undisclosed because it is a private research and development by EFRISA TEAM.**_
