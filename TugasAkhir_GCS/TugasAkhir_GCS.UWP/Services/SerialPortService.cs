@@ -36,6 +36,7 @@ namespace TugasAkhir_GCS.UWP.Services
 
             try
             {
+                var tests = await DeviceInformation.FindAllAsync(SerialDevice.GetDeviceSelector()).AsTask();
                 var devices = await DeviceInformation.FindAllAsync(SerialDevice.GetDeviceSelector()).AsTask(canceltoken);
 
                 foreach (var device in devices)
@@ -97,14 +98,12 @@ namespace TugasAkhir_GCS.UWP.Services
             if(ConnectedPort != null)
                 ConnectedPort.Dispose();
 
-            SerialPorts.Clear();
-
             DataReceived = null;
 
             return Task.FromResult(true);
         }
 
-        async void SerialRead_Entry(CancellationToken canceltoken)
+        void SerialRead_Entry(CancellationToken canceltoken)
         {
             Thread.CurrentThread.Name = "SerialReader Thread";
 
@@ -114,7 +113,7 @@ namespace TugasAkhir_GCS.UWP.Services
             {
                 try
                 {
-                    await ConnectedPort.InputStream.ReadAsync(RxBuf, RxBuf.Capacity, InputStreamOptions.Partial).AsTask(canceltoken);
+                    ConnectedPort.InputStream.ReadAsync(RxBuf, RxBuf.Capacity, InputStreamOptions.None).AsTask(canceltoken).Wait();
                 }
                 catch (OperationCanceledException)
                 {
@@ -131,21 +130,22 @@ namespace TugasAkhir_GCS.UWP.Services
 
                 if (RxBuf.Length > 0)
                 {
-                    //Debug.WriteLine($"SerialReader received -> {RxBuf.Length}[");
+                    if(RxBuf.Length % 16 != 0) Debug.WriteLine("SerialData not valid AES block");
+
                     var receiveTime = DateTime.Now;
 
-                    int count = 0;
+                    //int count = 0;
 
-                    foreach (var hex in RxBuf.ToArray())
-                    {
-                        Debug.Write($" {hex:X2} ");
-                        if (++count > 15)
-                        {
-                            Debug.WriteLine("");
-                            count = 0;
-                        }
-                    }
-                    Debug.WriteLine("]");
+                    //foreach (var hex in RxBuf.ToArray())
+                    //{
+                    //    Debug.Write($" {hex:X2} ");
+                    //    if (++count > 15)
+                    //    {
+                    //        Debug.WriteLine("");
+                    //        count = 0;
+                    //    }
+                    //}
+                    //Debug.WriteLine("]");
 
                     if (DataReceived != null) DataReceived(this, RxBuf.ToArray(), receiveTime);
                 }

@@ -21,10 +21,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FLS.Rules
+namespace FLS.Interfaces
 {
-	public interface IFuzzyRuleEvaluator
-	{
-		Double Evaluate(List<FuzzyRuleCondition> ruleConditions);
-	}
+    public interface IFuzzyRuleEvaluator
+    {
+        double Evaluate(List<FuzzyRuleCondition> ruleConditions);
+    }
 }

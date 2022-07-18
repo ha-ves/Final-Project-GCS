@@ -14,6 +14,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Accord.Fuzzy;
 using MavLinkNet;
+using TugasAkhir_GCS.CustomView;
 using TugasAkhir_GCS.Interfaces;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -82,6 +83,8 @@ namespace TugasAkhir_GCS
         #endregion
 
         #region Update UI
+
+        DateTime lastdatetime = DateTime.Now;
 
         public void UpdateUI(UasMessage msg)
         {
@@ -226,17 +229,17 @@ namespace TugasAkhir_GCS
         private void UpdateAtt(float yawRad, float pitchRad, float rollRad)
         {
             LastSamples.Add(rollRad * 180.0 / Math.PI);
-            if (FlightStopwatch != null)
-                LastSamplesTime.Add(FlightStopwatch.Elapsed.TotalMilliseconds);
+            //if (FlightStopwatch != null)
+            //    LastSamplesTime.Add(FlightStopwatch.Elapsed.TotalMilliseconds);
 
             if (LastSamples.Count > SamplesWindow)
                 LastSamples.RemoveAt(0);
-            if (LastSamplesTime.Count > SamplesWindow)
-                LastSamplesTime.RemoveAt(0);
+            //if (LastSamplesTime.Count > SamplesWindow)
+            //    LastSamplesTime.RemoveAt(0);
 
             IMU_Avionic.UpdateUI(pitchRad, rollRad);
 
-            if(!useCompass)
+            if (!useCompass)
                 MapView.UpdateBearing((float)(((yawRad * 180.0 / Math.PI) + 360.0) % 360));
         }
 
@@ -245,7 +248,7 @@ namespace TugasAkhir_GCS
 #endif
         private void UpdateKestabilanTerbang(out double grads)
         {
-            if (LastSamples.Count < SamplesWindow || LastSamplesTime.Count < SamplesWindow)
+            if (LastSamples.Count < SamplesWindow /*|| LastSamplesTime.Count < SamplesWindow*/)
             {
                 grads = 0;
                 return;
@@ -331,7 +334,7 @@ namespace TugasAkhir_GCS
             //lat = -74107080 + new Random().Next(-200, 200);
             //lon = 1127047190 + new Random().Next(-200, 200);
 
-            if (lat == int.MinValue || lon == int.MinValue)
+            if (lat == int.MinValue || lon == int.MinValue || lat == 0 || lon == 0)
                 return;
 
             MapView.UpdateGPS(lat, lon, alt);
@@ -361,7 +364,8 @@ namespace TugasAkhir_GCS
 #if DATA_FETCH
             MainThread.BeginInvokeOnMainThread(() => sig.Text = $"rssi : {100.0 - (dropRateComm / 100.0):0.00} %");
 #else
-            SignalPercent = $"rssi : {100.0 - (dropRateComm * 0.01):0.00} %";
+            SignalPercent = $"sinyal : {100.0 - (dropRateComm * 0.01):0.00} %";
+            Debug.WriteLine(SignalPercent);
 #endif
         }
 
@@ -474,11 +478,9 @@ namespace TugasAkhir_GCS
         {
             if (!(App.Current as App).IsConnected)
             {
-                var valid = false;
-
                 ((View)ConnSettingBtn).IsEnabled = false;
                 
-                (sender as Button).Text = "Connecting";
+                (sender as Button).Text = "Menghubungkan...";
                 (sender as Button).IsEnabled = false;
                 (sender as Button).BackgroundColor = Color.DarkGray;
 
@@ -487,23 +489,12 @@ namespace TugasAkhir_GCS
                 switch ((App.Current as App).CurrentConnection.ConnType)
                 {
                     case ConnectionType.USB:
-                        
-
                         var COM = (App.Current as App).CurrentConnection.Config["COM"] as string;
-                        if (!COM.Contains("COM"))
-                        {
-                            if (!await DisplayAlert("COM Port tidak valid :", COM, "OK", "Ubah"))
-                                ConnSettings.ShowPanel();
-                            break;
-                        }
-
-                        valid = true;
 
                         if (!await Task.Run(() => (App.Current as App).ReceiverService.ConnectTo(COM, (App.Current as App).CurrentConnection.Config["Baudrate"] as string)))
                             break;
 
                         (App.Current as App).IsConnected = true;
-                        
                         break;
                     case ConnectionType.WIFI:
                         if (await Permissions.RequestAsync<Permissions.NetworkState>() != PermissionStatus.Granted)
@@ -526,13 +517,10 @@ namespace TugasAkhir_GCS
                             break;
                         }
 
-                        valid = true;
-
                         if (!await Task.Run(() => ((App.Current as App).ReceiverService as WIFIService).ConnectTo(IP, PortNum)))
                             break;
 
                         (App.Current as App).IsConnected = true;
-                        
                         break;
                     default:
                         break;
@@ -542,15 +530,14 @@ namespace TugasAkhir_GCS
                 {
                     StartFlightTimer();
 
-                    (sender as Button).Text = "tap to disconnect";
+                    (sender as Button).Text = "tekan untuk putuskan";
                     (sender as Button).BackgroundColor = Color.Green;
                 }
                 else
                 {
-                    if(valid)
-                        await DisplayAlert("Gagal terhubung ke UAV", "UAV tidak ditemukan.", "OK");
+                    await DisplayAlert("Gagal terhubung ke UAV", "Silakan coba lagi.", "OK");
 
-                    (sender as Button).Text = "tap to connect";
+                    (sender as Button).Text = "tekan untuk koneksi";
                     (sender as Button).BackgroundColor = Color.Red;
 
                     ((View)ConnSettingBtn).IsEnabled = true;
@@ -562,7 +549,7 @@ namespace TugasAkhir_GCS
                 if (!await DisplayAlert("Anda akan memutuskan koneksi UAV", "Anda menekan tombol Disconnect, apakah anda yakin?", "YA, DISCONNECT", "Batal"))
                     return;
 
-                (sender as Button).Text = "Disconnecting";
+                (sender as Button).Text = "Memutuskan...";
                 (sender as Button).IsEnabled = false;
                 (sender as Button).BackgroundColor = Color.DarkBlue;
 
@@ -579,7 +566,7 @@ namespace TugasAkhir_GCS
 
                 if ((App.Current as App).IsConnected)
                 {
-                    (sender as Button).Text = "tap to disconnect";
+                    (sender as Button).Text = "tekan untuk putuskan";
                     (sender as Button).BackgroundColor = Color.Green;
                 }
                 else
@@ -587,7 +574,7 @@ namespace TugasAkhir_GCS
                     StopFlightTimer();
                     (App.Current as App).ReturnTime.Dispose();
 
-                    (sender as Button).Text = "tap to connect";
+                    (sender as Button).Text = "tekan untuk koneksi";
                     (sender as Button).BackgroundColor = Color.Red;
 
                     ((View)ConnSettingBtn).IsEnabled = true;

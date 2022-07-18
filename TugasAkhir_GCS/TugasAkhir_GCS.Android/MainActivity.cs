@@ -5,7 +5,9 @@ using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
 using Android;
+using Android.Hardware.Usb;
 
+[assembly: UsesFeature("android.hardware.usb.host")]
 namespace TugasAkhir_GCS.Droid
 {
     [Activity(
@@ -18,16 +20,14 @@ namespace TugasAkhir_GCS.Droid
             ConfigChanges.SmallestScreenSize,
         ScreenOrientation = ScreenOrientation.UserLandscape
     )]
-    //[IntentFilter(actions: new[]{
-    //    "android.hardware.usb.action.USB_DEVICE_ATTACHED"
-    //})]
-    //[MetaData(
-    //    name: "android.hardware.usb.action.USB_DEVICE_ATTACHED",
-    //    Resource = "@xml/device_filter")]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
+        internal static MainActivity Current { get; set; }
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            Current = this;
+
             base.OnCreate(savedInstanceState);
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);

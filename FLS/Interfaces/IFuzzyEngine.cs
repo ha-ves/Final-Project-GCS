@@ -20,12 +20,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FLS
+namespace FLS.Interfaces
 {
-	public interface IFuzzyEngine
-	{
-		FuzzyRuleCollection Rules { get; }
-		IDefuzzification Defuzzification { get; }
-		Double Defuzzify(object inputValues);
-	}
+    public interface IFuzzyEngine
+    {
+        FuzzyRuleCollection Rules { get; }
+        IDefuzzification Defuzzification { get; }
+        double Defuzzify(object inputValues);
+    }
 }

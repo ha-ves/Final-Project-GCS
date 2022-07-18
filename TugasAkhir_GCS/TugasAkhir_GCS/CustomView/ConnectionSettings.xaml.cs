@@ -12,7 +12,7 @@ using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace TugasAkhir_GCS
+namespace TugasAkhir_GCS.CustomView
 {
     public enum ConnectionType
     {
@@ -62,15 +62,32 @@ namespace TugasAkhir_GCS
 
         private async void Btn_USB_Clicked(object sender, EventArgs e)
         {
-            if ((App.Current as App).ReceiverService == null || (App.Current as App).ReceiverService.GetType() != DependencyService.Get<IReceiverService>().GetType())
+            if ((Application.Current as App).ReceiverService == null || (Application.Current as App).ReceiverService.GetType() != DependencyService.Get<IReceiverService>().GetType())
             {
-                if((App.Current as App).ReceiverService != null)
-                    await (App.Current as App).ReceiverService.Disconnect();
-                (App.Current as App).ReceiverService = DependencyService.Get<IReceiverService>();
+                if ((Application.Current as App).ReceiverService != null)
+                    await (Application.Current as App).ReceiverService.Disconnect();
+                (Application.Current as App).ReceiverService = DependencyService.Get<IReceiverService>();
             }
 
-            (App.Current.MainPage as MainPage).ShowLoadingOverlay("Refreshing...");
+            (Application.Current.MainPage as MainPage).ShowLoadingOverlay("Refreshing...");
 
+            await Task.Run(() => RefreshSerial());
+
+            COM_Ports.SelectedIndex = 0;
+
+            (sender as ImageButton).BorderWidth = 2;
+
+            ConfigStack.IsVisible = true;
+            (COM_Ports.Parent as View).IsVisible = true;
+
+            (IP_Address.Parent as View).IsVisible = false;
+            (((sender as ImageButton).Parent as StackLayout).Children[2] as ImageButton).BorderWidth = 0;
+
+            (Application.Current.MainPage as MainPage).HideLoadingOverlay();
+        }
+
+        private async Task RefreshSerial()
+        {
             Debug.WriteLine("USB BUTTON TAPPED");
             ConnArgs.ConnType = ConnectionType.USB;
 
@@ -85,38 +102,26 @@ namespace TugasAkhir_GCS
             {
                 if (canceltoken.IsCancellationRequested) break;
 
-                COMS.Clear();
+                await MainThread.InvokeOnMainThreadAsync(() => COMS.Clear());
 
-                ports = await (App.Current as App).ReceiverService.RefreshSerialPorts(canceltoken.Token);
+                ports = await (Application.Current as App).ReceiverService.RefreshSerialPorts(canceltoken.Token);
 
-                COMS.AddRange(ports);
+                await MainThread.InvokeOnMainThreadAsync(() => COMS.AddRange(ports));
 
                 Debug.WriteLine($"COMS.Count == 0 [{COMS.Count == 0}] || lastcoms.SequenceEqual(COMS) [{lastcoms.SequenceEqual(COMS)}]");
             }
 
             if (COMS.Count == 0)
-                COMS.AddRange(lastcoms);
-
-            COM_Ports.SelectedIndex = 0;
-
-            (sender as ImageButton).BorderWidth = 2;
-
-            ConfigStack.IsVisible = true;
-            (COM_Ports.Parent as View).IsVisible = true;
-
-            (IP_Address.Parent as View).IsVisible = false;
-            (((sender as ImageButton).Parent as StackLayout).Children[2] as ImageButton).BorderWidth = 0;
-
-            (App.Current.MainPage as MainPage).HideLoadingOverlay();
+                await MainThread.InvokeOnMainThreadAsync(() => COMS.AddRange(lastcoms));
         }
 
         private async void Btn_WIFI_Clicked(object sender, EventArgs e)
         {
-            if ((App.Current as App).ReceiverService == null || (App.Current as App).ReceiverService.GetType() != typeof(WIFIService))
+            if ((Application.Current as App).ReceiverService == null || (Application.Current as App).ReceiverService.GetType() != typeof(WIFIService))
             {
-                if ((App.Current as App).ReceiverService != null)
-                    await (App.Current as App).ReceiverService.Disconnect();
-                (App.Current as App).ReceiverService = new WIFIService();
+                if ((Application.Current as App).ReceiverService != null)
+                    await (Application.Current as App).ReceiverService.Disconnect();
+                (Application.Current as App).ReceiverService = new WIFIService();
             }
 
             //Debug.WriteLine("WIFI BUTTON TAPPED");
@@ -174,11 +179,11 @@ namespace TugasAkhir_GCS
                 case GestureStatus.Started:
                     break;
                 case GestureStatus.Running:
-                    var winwidth = (App.Current.MainPage as MainPage).Width;
-                    var winheight = (App.Current.MainPage as MainPage).Height;
+                    var winwidth = (Application.Current.MainPage as MainPage).Width;
+                    var winheight = (Application.Current.MainPage as MainPage).Height;
 
-                    var edgex = Math.Abs(Width - (App.Current.MainPage as MainPage).Width) / 2.0;
-                    var edgey = Math.Abs(Height - (App.Current.MainPage as MainPage).Height) / 2.0;
+                    var edgex = Math.Abs(Width - (Application.Current.MainPage as MainPage).Width) / 2.0;
+                    var edgey = Math.Abs(Height - (Application.Current.MainPage as MainPage).Height) / 2.0;
 
                     var transx = LastX + e.TotalX;
                     var transy = LastY + e.TotalY;

@@ -46,10 +46,10 @@
             <On Platform="Android" Value="90"/>
         </OnPlatform>-->
 
-        <OnPlatform x:Key="TopBar_Margin" x:TypeArguments="Thickness">
-            <On Platform="UWP" Value="0,-32,0,0"/>
-            <On Platform="Android" Value="0,-32,0,0"/>
-        </OnPlatform>
+        <OnIdiom x:Key="TopBar_Margin" x:TypeArguments="Thickness"
+                 Desktop="0,-32,0,0"
+                 Tablet="0,-32,0,0"
+                 Phone="0,-24,0,0"/>
 
         <!--<OnPlatform x:Key="BotPanelCollapsedTransY" x:TypeArguments="x:Byte">
             <On Platform="UWP" Value="260"/>

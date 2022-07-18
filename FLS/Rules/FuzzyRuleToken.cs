@@ -14,6 +14,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
 #endregion
+using FLS.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,10 +22,10 @@ using System.Text;
 
 namespace FLS.Rules
 {
-	/// <summary>
-	/// Individual Token for a fuzzy rule
-	/// </summary>
-	public class FuzzyRuleToken : IFuzzyRuleToken
+    /// <summary>
+    /// Individual Token for a fuzzy rule
+    /// </summary>
+    public class FuzzyRuleToken : IFuzzyRuleToken
 	{
 		public FuzzyRuleToken()
 		{

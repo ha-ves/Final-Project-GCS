@@ -21,7 +21,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Animation = Xamarin.Forms.Animation;
 
-namespace TugasAkhir_GCS
+namespace TugasAkhir_GCS.CustomView
 {
     public partial class MapView : ContentView
     {
@@ -54,9 +54,9 @@ namespace TugasAkhir_GCS
             };
             mapView.Map.Widgets.Add(new Mapsui.Widgets.ScaleBar.ScaleBarWidget(mapView.Map)
             {
-                TextAlignment = Mapsui.Widgets.Alignment.Center,
-                HorizontalAlignment = Mapsui.Widgets.HorizontalAlignment.Right,
-                VerticalAlignment = Mapsui.Widgets.VerticalAlignment.Bottom,
+                TextAlignment = Alignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Bottom,
                 MarginY = 30,
             });
 
@@ -84,7 +84,7 @@ namespace TugasAkhir_GCS
 
                 mapView.Navigator.NavigateTo(
                     SphericalMercator.FromLonLat(Wahana.Position.Longitude, Wahana.Position.Latitude),
-                    ZoomLevelExtensions.ToMapsuiResolution(18.5), 3000, Mapsui.Utilities.Easing.CubicInOut);
+                    18.5.ToMapsuiResolution(), 3000, Mapsui.Utilities.Easing.CubicInOut);
 
                 Home = new Pin(mapView)
                 {
@@ -97,28 +97,28 @@ namespace TugasAkhir_GCS
                 mapView.Pins.Add(Home);
 
                 Home.Position = new Position(lat * 0.0000001, lon * 0.0000001);
-                (App.Current as App).ReturnTime.Home = new MavLinkNet.UasGlobalPositionInt() { Lat = lat, Lon = lon, RelativeAlt = alt };
+                (Application.Current as App).ReturnTime.Home = new MavLinkNet.UasGlobalPositionInt() { Lat = lat, Lon = lon, RelativeAlt = alt };
 
                 return;
             }
 #if DATA_FETCH
             Wahana.Position = new Position(lat * 0.0000001, lon * 0.0000001);
 #else
-            (App.Current as App).ReturnTime.UAV = new MavLinkNet.UasGlobalPositionInt() { Lat = lat, Lon = lon, RelativeAlt = alt };
+            (Application.Current as App).ReturnTime.UAV = new MavLinkNet.UasGlobalPositionInt() { Lat = lat, Lon = lon, RelativeAlt = alt };
 
             var asal_pos = Wahana.Position;
             var temp_pos = new Position(lat * 0.0000001, lon * 0.0000001);
 
-            AnimationExtensions.Animate(this, name: "PositionAnim", length: App.Current.Resources["AnimLength"] as OnIdiom<byte>,
+            this.Animate(name: "PositionAnim", length: Application.Current.Resources["AnimLength"] as OnIdiom<byte>,
                 transform: (time) =>
                 {
                     var lat_interpolated = asal_pos.Latitude
-                                        + ((temp_pos.Latitude - asal_pos.Latitude)
-                                        * time);
+                                        + (temp_pos.Latitude - asal_pos.Latitude)
+                                        * time;
 
                     var lon_interpolated = asal_pos.Longitude
-                                        + ((temp_pos.Longitude - asal_pos.Longitude)
-                                        * time);
+                                        + (temp_pos.Longitude - asal_pos.Longitude)
+                                        * time;
 
                     return new Position(lat_interpolated, lon_interpolated);
                 },
@@ -148,7 +148,7 @@ namespace TugasAkhir_GCS
             new Animation(start: Wahana.Rotation, end: hdg,
                 callback: val => Wahana.Rotation = (float)val,
                 finished: () => Wahana.Rotation = bearing
-            ).Commit(this, "HeadingAnim", length: App.Current.Resources["AnimLength"] as OnIdiom<byte>, easing: Xamarin.Forms.Easing.SinInOut);
+            ).Commit(this, "HeadingAnim", length: Application.Current.Resources["AnimLength"] as OnIdiom<byte>, easing: Xamarin.Forms.Easing.SinInOut);
 #endif
         }
     }

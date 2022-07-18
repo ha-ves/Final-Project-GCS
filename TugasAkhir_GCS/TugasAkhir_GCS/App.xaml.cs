@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using TugasAkhir_GCS.CustomView;
 using TugasAkhir_GCS.Interfaces;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -37,7 +38,7 @@ namespace TugasAkhir_GCS
         /* stopwatch benchmark */
         public DateTime packettime;
 
-        public IFileHandler attsavefile, gpssavefile, syssavefile, hrtsavefile, stabilfile, returnfile;
+        public IFileHandler attsavefile, gpssavefile, syssavefile, hrtsavefile, stabilfile, returnfile, dropfile;
 
         /* return time variables */
         public ReturnTimeService ReturnTime;
@@ -52,10 +53,13 @@ namespace TugasAkhir_GCS
 
             (MainPage as MainPage).HideLoadingOverlay();
 
-            DeviceDisplay.KeepScreenOn = true;
-#if DATA_FETCH
+            //DeviceDisplay.KeepScreenOn = true;
+
             var time = DateTime.Now.ToString("yyyy-MM-dd_ss-mm-HH");
 
+            //dropfile = DependencyService.Get<IFileHandler>(DependencyFetchTarget.NewInstance);
+            //dropfile.Initialize($"DropRate_{time}.csv");
+#if DATA_FETCH
             returnfile = DependencyService.Get<IFileHandler>(DependencyFetchTarget.NewInstance);
             returnfile.Initialize($"ReturnTime_{time}.csv");
             stabilfile = DependencyService.Get<IFileHandler>(DependencyFetchTarget.NewInstance);
@@ -85,6 +89,8 @@ namespace TugasAkhir_GCS
                 stabilfile.Finish();
             if (returnfile != null)
                 returnfile.Finish();
+            if (dropfile != null)
+                dropfile.Finish();
         }
 
 #region Transport
@@ -163,19 +169,23 @@ namespace TugasAkhir_GCS
                 MavLinkTransport.DataReceived(sender, plain);
 
                 //Debug.WriteLine($"Plaintext (decrypted in {decrypt.TotalMilliseconds} ms) -> {plain.Length} bytes");
+
                 //int count = 0;
-                //for (int i = 0; i < plain.Length; i++)
+
+                //var str = "Android Decrypt :" + System.Environment.NewLine + "[";
+
+                //foreach (var hex in plain)
                 //{
-                //    Debug.Write($" {plain[i]:X2} ");
+                //    str += $" {hex:X2} ";
                 //    if (++count > 15)
                 //    {
-                //        Debug.WriteLine("");
+                //        str += System.Environment.NewLine;
                 //        count = 0;
                 //    }
                 //}
-                //Debug.WriteLine("");
+                //System.Diagnostics.Debug.WriteLine(str + "]");
             }
-            catch (CryptographicException)
+            catch (CryptographicException cryptExc)
             {
                 //Debug.WriteLine($"AESDecryptProcess Exception. {cryptExc.Message}\r\n");
                 return;
@@ -271,7 +281,10 @@ namespace TugasAkhir_GCS
                     case UasSysStatus SysStat:
                         MavLinkCmdAck.Set();
                         SysStat.DropRateComm = (ushort)droppedPackets.Map(0, droppedPackets + totalPackets, 0, 10000);
-                        //Debug.WriteLine($"Comm Dropped packets: {droppedPackets} out of {droppedPackets + totalPackets}");
+
+                        Debug.WriteLine($"Comm Dropped packets: {droppedPackets} out of {droppedPackets + totalPackets}");
+
+
                         totalPackets = 0;
                         droppedPackets = 0;
                         (MainPage as MainPage).UpdateUI(packet.Message);

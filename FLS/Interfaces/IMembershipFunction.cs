@@ -14,20 +14,19 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
 #endregion
-using FLS.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FLS.MembershipFunctions
+namespace FLS.Interfaces
 {
-	public interface IMembershipFunction : IFuzzyRuleToken
-	{
-		Double Fuzzify(Double inputValue);
-		Double PremiseModifier { get; set; }
-		Double Modification { get; set; }
-		Double Min();
-		Double Max();
-	}
+    public interface IMembershipFunction : IFuzzyRuleToken
+    {
+        double Fuzzify(double inputValue);
+        double PremiseModifier { get; set; }
+        double Modification { get; set; }
+        double Min();
+        double Max();
+    }
 }

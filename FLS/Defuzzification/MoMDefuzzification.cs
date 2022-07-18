@@ -14,44 +14,44 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
 #endregion
-using FLS.MembershipFunctions;
+using FLS.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FLS
+namespace FLS.Defuzzification
 {
-	public class MoMDefuzzification : IDefuzzification
-	{
-		public Double Defuzzify(List<IMembershipFunction> functions)
-		{
-			var minX = functions.Select(f => f.Min()).Min();
-			var maxX = functions.Select(f => f.Max()).Max();
+    public class MoMDefuzzification : IDefuzzification
+    {
+        public double Defuzzify(List<IMembershipFunction> functions)
+        {
+            var minX = functions.Select(f => f.Min()).Min();
+            var maxX = functions.Select(f => f.Max()).Max();
 
-			var max = 0.0;
-			var startMax = 0.0;
-			var len = 0.0;
+            var max = 0.0;
+            var startMax = 0.0;
+            var len = 0.0;
 
-			for (var i = minX; i <= maxX; i += 1)
-			{
-				var maxFuzVal = functions.Select(f=>f.PremiseModifier * f.Fuzzify(i)).Max();
-				if (max < maxFuzVal)
-				{
-					max = maxFuzVal;
-					startMax = i;
-					len = 0.0;
-				}
-				else if (max == maxFuzVal && 0 < maxFuzVal)
-				{
-					len++;
-				}
-			}
+            for (var i = minX; i <= maxX; i += 1)
+            {
+                var maxFuzVal = functions.Select(f => f.PremiseModifier * f.Fuzzify(i)).Max();
+                if (max < maxFuzVal)
+                {
+                    max = maxFuzVal;
+                    startMax = i;
+                    len = 0.0;
+                }
+                else if (max == maxFuzVal && 0 < maxFuzVal)
+                {
+                    len++;
+                }
+            }
 
-			var mid = startMax + (len / 2.0);
+            var mid = startMax + len / 2.0;
 
-			return mid;
-		}
-	}
+            return mid;
+        }
+    }
 }

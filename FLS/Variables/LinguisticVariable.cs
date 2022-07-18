@@ -21,48 +21,48 @@ using System.Linq;
 using FLS.Rules;
 using FLS.MembershipFunctions;
 
-namespace FLS
+namespace FLS.Variables
 {
-	/// <summary>
-	/// A linguistic variable.
-	/// </summary>
-	public class LinguisticVariable : FuzzyRuleToken
-	{
-		#region Constructors
+    /// <summary>
+    /// A linguistic variable.
+    /// </summary>
+    public class LinguisticVariable : FuzzyRuleToken
+    {
+        #region Constructors
 
-		public LinguisticVariable(string name)
-			: base(name, FuzzyRuleTokenType.Variable)
-		{
-			_membershipFunctions = new MembershipFunctionCollection();
-		}
+        public LinguisticVariable(string name)
+            : base(name, FuzzyRuleTokenType.Variable)
+        {
+            _membershipFunctions = new MembershipFunctionCollection();
+        }
 
-		#endregion
+        #endregion
 
-		#region Private Properties
+        #region Private Properties
 
-		private MembershipFunctionCollection _membershipFunctions;
-		private Double _inputValue = 0;
+        private MembershipFunctionCollection _membershipFunctions;
+        private double _inputValue = 0;
 
-		#endregion
+        #endregion
 
-		#region Public Properties
+        #region Public Properties
 
-		/// <summary>
-		/// A collection of the variable's membership functions.
-		/// </summary>
-		public MembershipFunctionCollection MembershipFunctions
-		{
-			get { return _membershipFunctions; }
-			set { _membershipFunctions = value; }
-		}
+        /// <summary>
+        /// A collection of the variable's membership functions.
+        /// </summary>
+        public MembershipFunctionCollection MembershipFunctions
+        {
+            get { return _membershipFunctions; }
+            set { _membershipFunctions = value; }
+        }
 
-		public double InputValue
-		{
-			get { return _inputValue; }
-			set { _inputValue = value; }
-		}
+        public double InputValue
+        {
+            get { return _inputValue; }
+            set { _inputValue = value; }
+        }
 
-		#endregion
+        #endregion
 
-	}
+    }
 }

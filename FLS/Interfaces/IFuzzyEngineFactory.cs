@@ -14,19 +14,20 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
 #endregion
+using FLS.InferenceEngines;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FLS
+namespace FLS.Interfaces
 {
-	public interface IFuzzyEngineFactory
-	{
-		IFuzzyEngine Default();
+    public interface IFuzzyEngineFactory
+    {
+        IFuzzyEngine Default();
 
-		IFuzzyEngine Create(IDefuzzification defuzzification);
+        IFuzzyEngine Create(IDefuzzification defuzzification);
 
-		IFuzzyEngine Create(FuzzyEngineType type);
-	}
+        IFuzzyEngine Create(FuzzyEngineType type);
+    }
 }

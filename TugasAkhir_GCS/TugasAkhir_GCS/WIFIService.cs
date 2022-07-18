@@ -106,18 +106,18 @@ namespace TugasAkhir_GCS
 
             if ((App.Current as App).consolemutex.WaitOne(0))
             {
-                Debug.WriteLine($"New WIFI Data (encrypted) -> {bytes} bytes");
-                int count = 0;
-                for (int i = 0; i < bytes; i++)
-                {
-                    Debug.Write($"0x{RxBuf[i]:X2} ");
-                    if (++count > 15)
-                    {
-                        Debug.WriteLine("");
-                        count = 0;
-                    }
-                }
-                Debug.WriteLine("");
+                //Debug.WriteLine($"New WIFI Data (encrypted) -> {bytes} bytes");
+                //int count = 0;
+                //for (int i = 0; i < bytes; i++)
+                //{
+                //    Debug.Write($"0x{RxBuf[i]:X2} ");
+                //    if (++count > 15)
+                //    {
+                //        Debug.WriteLine("");
+                //        count = 0;
+                //    }
+                //}
+                //Debug.WriteLine("");
 
                 (App.Current as App).consolemutex.ReleaseMutex();
             }

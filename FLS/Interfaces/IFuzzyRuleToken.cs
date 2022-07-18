@@ -14,16 +14,17 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
 #endregion
+using FLS.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FLS.Rules
+namespace FLS.Interfaces
 {
-	public interface IFuzzyRuleToken
-	{
-		String Name { get; set; }
-		FuzzyRuleTokenType Type { get; set; }
-	}
+    public interface IFuzzyRuleToken
+    {
+        string Name { get; set; }
+        FuzzyRuleTokenType Type { get; set; }
+    }
 }

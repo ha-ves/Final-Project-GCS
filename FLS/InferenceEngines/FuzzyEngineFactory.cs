@@ -14,60 +14,62 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
 #endregion
+using FLS.Defuzzification;
+using FLS.Interfaces;
 using FLS.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FLS
+namespace FLS.InferenceEngines
 {
-	public class FuzzyEngineFactory : IFuzzyEngineFactory
-	{
-		public FuzzyEngineFactory()
-			: this(new FuzzyRuleEvaluator())
-		{
+    public class FuzzyEngineFactory : IFuzzyEngineFactory
+    {
+        public FuzzyEngineFactory()
+            : this(new FuzzyRuleEvaluator())
+        {
 
-		}
+        }
 
-		public FuzzyEngineFactory(IFuzzyRuleEvaluator fuzzyRuleEvaluator)
-		{
-			_fuzzyRuleEvaluator = fuzzyRuleEvaluator;
-		}
+        public FuzzyEngineFactory(IFuzzyRuleEvaluator fuzzyRuleEvaluator)
+        {
+            _fuzzyRuleEvaluator = fuzzyRuleEvaluator;
+        }
 
-		#region Private Properties
+        #region Private Properties
 
-		protected IFuzzyRuleEvaluator _fuzzyRuleEvaluator;
+        protected IFuzzyRuleEvaluator _fuzzyRuleEvaluator;
 
-		#endregion
+        #endregion
 
-		public IFuzzyEngine Default()
-		{
-			return Create(new CoGDefuzzification());
-		}
+        public IFuzzyEngine Default()
+        {
+            return Create(new CoGDefuzzification());
+        }
 
-		public IFuzzyEngine Create(IDefuzzification defuzzification)
-		{
-			return new FuzzyEngine(defuzzification, _fuzzyRuleEvaluator);
-		}
+        public IFuzzyEngine Create(IDefuzzification defuzzification)
+        {
+            return new FuzzyEngine(defuzzification, _fuzzyRuleEvaluator);
+        }
 
-		public IFuzzyEngine Create(FuzzyEngineType type)
-		{
-			switch (type)
-			{
-				case FuzzyEngineType.CoG:
-					return Create(new CoGDefuzzification());
-				case FuzzyEngineType.MoM:
-					return Create(new MoMDefuzzification());
-				default:
-					throw new ArgumentException("Cannot create engine with type.");
-			}
-		}
-	}
+        public IFuzzyEngine Create(FuzzyEngineType type)
+        {
+            switch (type)
+            {
+                case FuzzyEngineType.CoG:
+                    return Create(new CoGDefuzzification());
+                case FuzzyEngineType.MoM:
+                    return Create(new MoMDefuzzification());
+                default:
+                    throw new ArgumentException("Cannot create engine with type.");
+            }
+        }
+    }
 
-	public enum FuzzyEngineType
-	{
-		CoG,
-		MoM
-	}
+    public enum FuzzyEngineType
+    {
+        CoG,
+        MoM
+    }
 }

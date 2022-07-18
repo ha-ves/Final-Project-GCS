@@ -3,20 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TugasAkhir_GCS.MainPage"
              xmlns:local="clr-namespace:TugasAkhir_GCS"
-             xmlns:avionics="clr-namespace:TugasAkhir_GCS.CustomView">
-    
+             xmlns:custom="clr-namespace:TugasAkhir_GCS.CustomView">
     <Grid x:Name="MainAppGrid">
         <StackLayout>
             <Frame BackgroundColor="#FFFFFF" CornerRadius="16" Margin="{StaticResource Key=TopBar_Margin}" Padding="0,4" VerticalOptions="Start">
                 <Frame BackgroundColor="#00879D" CornerRadius="16" Padding="0" Margin="0">
                     <Frame.HeightRequest>
-                        <OnPlatform x:TypeArguments="x:Double">
-                            <On Platform="Android">80</On>
-                            <On Platform="UWP">60</On>
-                        </OnPlatform>
+                        <OnIdiom x:TypeArguments="x:Double"
+                                 Desktop="60"
+                                 Tablet="80"
+                                 Phone="80"/>
                     </Frame.HeightRequest>
                     <Grid Margin="0,28,0,0" Padding="2">
-                        <Grid.ColumnDefinitions><!--ColumnDefinitions="*,3*,30,3*,2*,2*,2*"-->
+                        <Grid.ColumnDefinitions>
+                            <!--ColumnDefinitions="*,3*,30,3*,2*,2*,2*"-->
                             <ColumnDefinition Width="1.2*" />
                             <ColumnDefinition Width="2.5*" />
                             <ColumnDefinition Width="30" />
@@ -44,8 +44,8 @@
                                 </Frame>
                             </On>
                             <On Platform="UWP">-->
-                                <Button x:Name="ConnectBtn" Grid.Column="1" IsEnabled="false" BackgroundColor="DarkSlateGray" Text="tekan untuk koneksi" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" Clicked="Connection_Clicked" CornerRadius="4"/>
-                            <!--</On>-->
+                        <Button x:Name="ConnectBtn" Grid.Column="1" IsEnabled="false" BackgroundColor="DarkSlateGray" Text="tekan untuk koneksi" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" Clicked="Connection_Clicked" CornerRadius="4"/>
+                        <!--</On>-->
                         <!--</OnPlatform>-->
                         <!--<OnPlatform x:TypeArguments="View" x:Name="ConnSettingBtn">
                             <On Platform="Android">
@@ -57,15 +57,15 @@
                                 </Frame>
                             </On>
                             <On Platform="UWP">-->
-                                <ImageButton x:Name="ConnSettingBtn" Grid.Column="2" Clicked="Toggle_ConnSettings" BackgroundColor="DarkSlateBlue" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.settings.png}" Aspect="AspectFit" CornerRadius="4" Padding="2" HeightRequest="30"/>
-                            <!--</On>-->
+                        <ImageButton x:Name="ConnSettingBtn" Grid.Column="2" Clicked="Toggle_ConnSettings" BackgroundColor="DarkSlateBlue" Source="{local:ImageResource TugasAkhir_GCS.Resources.Images.settings.png}" Aspect="AspectFit" CornerRadius="4" Padding="2" HeightRequest="30"/>
+                        <!--</On>-->
                         <!--</OnPlatform>-->
                     </Grid>
                 </Frame>
             </Frame>
             
             <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Margin="0" Padding="0,-5,0,0">
-                <local:MapView x:Name="MapView"/>
+                <custom:MapView x:Name="MapView"/>
                 <StackLayout HorizontalOptions="Center" VerticalOptions="Start">
                     <Frame x:Name="WaktuKembali" Padding="5" IsVisible="false" BorderColor="White" BackgroundColor="#af000000">
                         <StackLayout Orientation="Horizontal">
@@ -92,17 +92,17 @@
                                 </Label.GestureRecognizers>
                             </Label>
                             <StackLayout Orientation="Horizontal">
-                                <avionics:AttitudeAvionic x:Name="IMU_Avionic" WidthRequest="{StaticResource Key=IMU_Dial}" HeightRequest="{StaticResource Key=IMU_Dial}" VerticalOptions="Center"/>
+                                <custom:AttitudeAvionic x:Name="IMU_Avionic" WidthRequest="{StaticResource Key=IMU_Dial}" HeightRequest="{StaticResource Key=IMU_Dial}" VerticalOptions="Center"/>
                                 <StackLayout Orientation="Vertical" VerticalOptions="Center">
-                                    <avionics:AltimeterAvionic x:Name="Alti_Avionic" WidthRequest="{StaticResource Key=AUX_Dial}" HeightRequest="{StaticResource Key=AUX_Dial}"/>
-                                    <avionics:BearingAvionic x:Name="Bearing_Avionic" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>
+                                    <custom:AltimeterAvionic x:Name="Alti_Avionic" WidthRequest="{StaticResource Key=AUX_Dial}" HeightRequest="{StaticResource Key=AUX_Dial}"/>
+                                    <custom:BearingAvionic x:Name="Bearing_Avionic" HeightRequest="{StaticResource Key=AUX_Dial}" WidthRequest="{StaticResource Key=AUX_Dial}"/>
                                 </StackLayout>
                             </StackLayout>
                         </StackLayout>
                     </Frame>
                 </StackLayout>
 
-                <!--testing stuff-->
+                <!--#region Testing area -->
                 <StackLayout VerticalOptions="Start" HorizontalOptions="Start" WidthRequest="300" IsVisible="true">
                     <FlexLayout Wrap="Wrap" IsVisible="false">
                         <Button Text="Demo Visualisasi" TextColor="Black" BackgroundColor="CornflowerBlue" Clicked="DemoVisualisasi" VerticalOptions="Start" HorizontalOptions="Start"/>
@@ -145,11 +145,12 @@
                         </StackLayout>
                     </StackLayout>
                 </StackLayout>
+                <!--#endregion-->
             </Grid>
         </StackLayout>
 
         <Grid BackgroundColor="#5AFFFFFF">
-            <local:ConnectionSettings x:Name="ConnSettings" Confirmed="ConnSettings_Confirmed" VerticalOptions="Center" HorizontalOptions="Center"/>
+            <custom:ConnectionSettings x:Name="ConnSettings" Confirmed="ConnSettings_Confirmed" VerticalOptions="Center" HorizontalOptions="Center"/>
         </Grid>
 
         <Grid x:Name="LoadingOverlay" BackgroundColor="#5AFFFFFF">

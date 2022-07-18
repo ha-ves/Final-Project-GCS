@@ -75,7 +75,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\FLS\FLS.csproj" />
-    <ProjectReference Include="..\mavlink.net\mavlink.net.csproj" />
+    <ProjectReference Include="..\..\mavlink.net\MavLinkNet.csproj" />
   </ItemGroup>
 
   <ItemGroup>

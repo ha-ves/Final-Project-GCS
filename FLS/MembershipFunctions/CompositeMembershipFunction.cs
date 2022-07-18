@@ -14,6 +14,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
 #endregion
+using FLS.Interfaces;
 using FLS.Rules;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ using System.Text;
 
 namespace FLS.MembershipFunctions
 {
-	public class CompositeMembershipFunction : BaseMembershipFunction
+    public class CompositeMembershipFunction : BaseMembershipFunction
 	{
 		public CompositeMembershipFunction(String name, IMembershipFunction leftFunction, IMembershipFunction rightFunction, double midPoint)
 			: base(name)

@@ -14,7 +14,8 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
 #endregion
-using FLS.MembershipFunctions;
+using FLS.Interfaces;
+using FLS.Variables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ using System.Text;
 
 namespace FLS.Rules
 {
-	public class FuzzyRuleClause
+    public class FuzzyRuleClause
 	{
 		public FuzzyRuleClause(LinguisticVariable variable, IFuzzyRuleToken @operator, IMembershipFunction function)
 		{

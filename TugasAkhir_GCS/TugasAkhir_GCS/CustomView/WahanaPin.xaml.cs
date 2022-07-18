@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace TugasAkhir_GCS
+namespace TugasAkhir_GCS.CustomView
 {
     public partial class PinView : ContentView
     {

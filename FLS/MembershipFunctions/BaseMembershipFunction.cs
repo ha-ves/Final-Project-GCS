@@ -14,6 +14,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
 #endregion
+using FLS.Interfaces;
 using FLS.Rules;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ using System.Threading.Tasks;
 
 namespace FLS.MembershipFunctions
 {
-	public abstract class BaseMembershipFunction : FuzzyRuleToken, IMembershipFunction
+    public abstract class BaseMembershipFunction : FuzzyRuleToken, IMembershipFunction
 	{
 		#region ctors
 

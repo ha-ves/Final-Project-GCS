@@ -19,13 +19,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Linq;
+using FLS.Interfaces;
 
 namespace FLS.MembershipFunctions
 {
-	/// <summary>
-	/// A collection of membership functions.
-	/// </summary>
-	public class MembershipFunctionCollection : Collection<IMembershipFunction>
+    /// <summary>
+    /// A collection of membership functions.
+    /// </summary>
+    public class MembershipFunctionCollection : Collection<IMembershipFunction>
 	{
 		#region Public Methods
 

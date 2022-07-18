@@ -14,17 +14,16 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License. 
 #endregion
-using FLS.MembershipFunctions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FLS
+namespace FLS.Interfaces
 {
-	public interface IDefuzzification
-	{
-		Double Defuzzify(List<IMembershipFunction> functions);
-	}
+    public interface IDefuzzification
+    {
+        double Defuzzify(List<IMembershipFunction> functions);
+    }
 }
