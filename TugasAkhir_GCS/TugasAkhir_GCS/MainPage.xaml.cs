@@ -28,7 +28,8 @@ namespace TugasAkhir_GCS
         string _flightMode = "offline";
         public string FlightMode { get => _flightMode; set { _flightMode = value; OnPropertyChanged("FlightMode"); } }
 
-        string _battPercent = "baterai : n/a %";
+        //string _battPercent = "baterai : n/a %";
+        string _battPercent = AppResources. + " : n/a %";
         public string BattPercent { get => _battPercent; set { _battPercent = value; OnPropertyChanged("BattPercent"); } }
 
         string _signalPercent = "sinyal : n/a %";
