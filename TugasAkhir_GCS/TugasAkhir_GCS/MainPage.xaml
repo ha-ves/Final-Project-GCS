@@ -44,7 +44,7 @@
                                 </Frame>
                             </On>
                             <On Platform="UWP">-->
-                        <Button x:Name="ConnectBtn" Grid.Column="1" IsEnabled="false" BackgroundColor="DarkSlateGray" Text="tekan untuk koneksi" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" Clicked="Connection_Clicked" CornerRadius="4"/>
+                        <Button x:Name="ConnectBtn" Grid.Column="1" IsEnabled="false" BackgroundColor="DarkSlateGray" Text="press to connect" FontFamily="TopBar Font" TextColor="White" TextTransform="Uppercase" Clicked="Connection_Clicked" CornerRadius="4"/>
                         <!--</On>-->
                         <!--</OnPlatform>-->
                         <!--<OnPlatform x:TypeArguments="View" x:Name="ConnSettingBtn">
@@ -67,9 +67,9 @@
             <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Margin="0" Padding="0,-5,0,0">
                 <custom:MapView x:Name="MapView"/>
                 <StackLayout HorizontalOptions="Center" VerticalOptions="Start">
-                    <Frame x:Name="WaktuKembali" Padding="5" IsVisible="false" BorderColor="White" BackgroundColor="#af000000">
+                    <Frame x:Name="WaktuKembali" Padding="5" IsVisible="true" BorderColor="White" BackgroundColor="#af000000">
                         <StackLayout Orientation="Horizontal">
-                            <Label Text="WAKTU KEMBALI:" WidthRequest="80" VerticalOptions="Center" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
+                            <Label Text="RETURN TIME:" WidthRequest="80" VerticalOptions="Center" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
                             <Grid>
                                 <Slider MinimumTrackColor="Green" MaximumTrackColor="Yellow" WidthRequest="150" Minimum="0" Maximum="11.25" ThumbImageSource="{local:ImageResource TugasAkhir_GCS.Resources.Images.clock.png}"/>
                                 <Rectangle BackgroundColor="Transparent"/>
@@ -81,8 +81,8 @@
                     </Frame>
                 </StackLayout>
                 <StackLayout Padding="5" Orientation="Vertical" VerticalOptions="End" HorizontalOptions="Center" IsVisible="true">
-                    <Frame x:Name="Kestabilan" Padding="5" IsVisible="false" BorderColor="White" BackgroundColor="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}">
-                        <Label Text="KESTABILAN" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
+                    <Frame x:Name="Kestabilan" Padding="5" IsVisible="true" BorderColor="White" BackgroundColor="DimGray" WidthRequest="{StaticResource Key=IMU_Dial}">
+                        <Label Text="STABILITY" TextColor="White" FontFamily="TopBar Font" CharacterSpacing="2" HorizontalTextAlignment="Center" TextTransform="Uppercase" HorizontalOptions="CenterAndExpand"/>
                     </Frame>
                     <Frame HorizontalOptions="Center" Padding="5" BackgroundColor="White">
                         <StackLayout Orientation="Vertical">
@@ -114,7 +114,7 @@
                         
                         <Label Text="DEMO LABEL" x:Name="DemoLabel" FontSize="Medium" BackgroundColor="#AA101010"></Label>
                     </FlexLayout>
-                    <StackLayout Orientation="Vertical">
+                    <StackLayout Orientation="Vertical" IsVisible="false">
                         <StackLayout>
                             <Label Text="Batt Modifier (%)" VerticalOptions="Center" BackgroundColor="Beige" TextColor="Black" FontSize="Micro"/>
                             <StackLayout Orientation="Horizontal">

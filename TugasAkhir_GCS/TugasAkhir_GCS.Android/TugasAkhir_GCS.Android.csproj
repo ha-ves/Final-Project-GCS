@@ -58,6 +58,8 @@
     <AndroidLinkTool>r8</AndroidLinkTool>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
     <AndroidSupportedAbis />
+    <AndroidKeyStore>false</AndroidKeyStore>
+    <AndroidSigningKeyStore>C:\Users\HaveS\AppData\Local\Xamarin\Mono for Android\Keystore\TugasAkhirKeystore\TugasAkhirKeystore.keystore</AndroidSigningKeyStore>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />

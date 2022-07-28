@@ -28,14 +28,14 @@ namespace TugasAkhir_GCS
         string _flightMode = "offline";
         public string FlightMode { get => _flightMode; set { _flightMode = value; OnPropertyChanged("FlightMode"); } }
 
-        //string _battPercent = "baterai : n/a %";
-        string _battPercent = AppResources. + " : n/a %";
+        string _battPercent = "battery : n/a %";
+        //string _battPercent = AppResources. + " : n/a %";
         public string BattPercent { get => _battPercent; set { _battPercent = value; OnPropertyChanged("BattPercent"); } }
 
-        string _signalPercent = "sinyal : n/a %";
+        string _signalPercent = "signal : n/a %";
         public string SignalPercent { get => _signalPercent; set { _signalPercent = value; OnPropertyChanged("SignalPercent"); } }
 
-        string _flightTime = "waktu terbang : t+00:00:00.00";
+        string _flightTime = "flight time : t+00:00:00.00";
         public string FlightTime { get => _flightTime; set { _flightTime = value; OnPropertyChanged("FlightTime"); } }
 
         /* timers n stuff */
